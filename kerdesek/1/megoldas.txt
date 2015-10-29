@@ -1,0 +1,38 @@
+https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html
+azaz mindig ezzel kezdődik: 0xCAFEBABE -> a babe mindig bennevan
+
+https://en.wikipedia.org/wiki/Java_class_file
+struct Class_File_Format {
+   u4 magic_number; // ezmiatt van babe
+
+   u2 minor_version;   
+   u2 major_version; // ez miatt van 33, mert az az 51 (java 7) 16osban
+
+   u2 constant_pool_count;   
+  
+   cp_info constant_pool[constant_pool_count - 1];
+
+   u2 access_flags;
+
+   u2 this_class;
+   u2 super_class;
+
+   u2 interfaces_count;   
+   
+   u2 interfaces[interfaces_count];
+
+   u2 fields_count;   
+   field_info fields[fields_count];
+
+   u2 methods_count;
+   method_info methods[methods_count];
+
+   u2 attributes_count;   
+   attribute_info attributes[attributes_count];
+}
+
+a 42 biztos nem, mert az intben 66, ami az fsub (https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings)
+hasonlóan az 51 meg a lor
+
+Szóval helyes:
+babe és 33
