@@ -1,0 +1,3 @@
+Az 5-ös nélkül lefordul. (lsd példa)
+
+Mivel az ősosztály interface, és az 'n' változó nagy valószínűséggel (?) az ősosztályának egy tagváltozója, ami ugye explicit static és final (http://stackoverflow.com/questions/2430756/why-are-interface-variables-static-and-final-by-default) , ezért nem lehet rajta ++ műveletet végrehajtani (?).
