@@ -1,0 +1,53 @@
+public class HashMore {
+
+	public static void main(String[] args) {
+		
+		for (int i = 0; i < 100_000_000; i++) {
+			
+			args[0].hashCode();
+		}
+	}
+}
+
+
+kimásolva a java.util.String ostrályból:
+
+    /**
+     * Returns a hash code for this string. The hash code for a
+     * <code>String</code> object is computed as
+     * <blockquote><pre>
+     * s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+     * </pre></blockquote>
+     * using <code>int</code> arithmetic, where <code>s[i]</code> is the
+     * <i>i</i>th character of the string, <code>n</code> is the length of
+     * the string, and <code>^</code> indicates exponentiation.
+     * (The hash value of the empty string is zero.)
+     *
+     * @return  a hash code value for this object.
+     */
+    public int hashCode() {
+        int h = hash;
+        if (h == 0) {
+            int off = offset;
+            char val[] = value;
+            int len = count;
+
+            for (int i = 0; i < len; i++) {
+                h = 31*h + val[off++];
+            }
+            hash = h;
+        }
+        return h;
+    }
+
+
+Szóval (egyválasz lehetőséges!):
+ A ) nem, lsd E
+ B ) nem, mert csak egyszer számolódik ki, kivéve... (lsd E)
+ C ) nem, mert (lsd E)
+ D ) nem, nincs köze az ascii karakterekhez, 
+ E ) igen, hisz ha valaki egy olyan string-et ad meg, amire ez a képlet 0-t ad vissza (túlcsordul az int, vagy végig '\0'), akkor az összes esetben (100_000_000) újra fogja generálni:
+     - A ) nem azonos, mert vannak kivételek
+     - B ) nem, mert egy rövid String is lehet hosszabb ideig fut mint egy hosszú, ha a rövid string hash-e 0 lenne
+     - C ) nem, mert vannak hosszabb szavak is, melyekre 0-t ad vissza, és újraszámol. (pl millió darab \0 karakter)
+ 
