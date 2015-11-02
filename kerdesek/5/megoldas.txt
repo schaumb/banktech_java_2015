@@ -1,0 +1,19 @@
+Az nem számít, hogy milyen targettel fordítjuk, ezt kipróbáltam (5-8.txt).
+A kérdés inkább az, hogy melyik verziónál van integer pooling és meddig terjed.
+
+6-7-8-ra megtaláltam specben:
+https://docs.oracle.com/javase/specs/jls/se6/html/conversions.html#5.1.7
+https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.1.7
+https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.1.7
+
+java 5-s vm-hez nem találtam spect, ezért feltettem és kipróbáltam:
+c:\Drive\Programming\Java\BankTech\RoundOne\5>java -version
+java version "1.5.0_22"
+Java(TM) 2 Runtime Environment, Standard Edition (build 1.5.0_22-b03)
+Java HotSpot(TM) Client VM (build 1.5.0_22-b03, mixed mode, sharing)
+
+c:\Drive\Programming\Java\BankTech\RoundOne\5>java CheckEquality
+true
+false
+true
+false
