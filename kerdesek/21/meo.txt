@@ -1,0 +1,8 @@
+Egyválasz lehetőséges.
+
+A ) nem ? - buid időben tudtommal nem hajt végre kód optimalizálást. (?)
+B ) nem ? - szerintem nem a hardvertől függ, de akkor nem is úgy lenne feltéve a kérdés
+C ) igen? - Erre gondoltam, mivel ebben erős a Java
+D ) nem ? - mivel a tömb egyszerre lett a stack-re lefoglalva, memóriafelszabadításról tudtommal nincs szó
+
+Ez csak egy nagyon erős tipp, nincs mögötte szakmai háttérismeret, át kell még gondolni.
