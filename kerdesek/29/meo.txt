@@ -1,0 +1,4 @@
+http://www.programcreek.com/2013/09/the-substring-method-in-jdk-6-and-jdk-7/
+http://bugs.java.com/view_bug.do?bug_id=6294060
+
+F,G ?
