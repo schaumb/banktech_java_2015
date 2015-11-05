@@ -1,0 +1,9 @@
+Nem megmondható, attól függ, hogy a GC mennyire aktív.
+
+A kérdés: " találhatjuk meg"
+A String-et, mert a char[] a stack-en alokálódik, a Stringet meg nem biztos hogy elvitte még a GC .
+
+
+DE ha pont fordítva van a kérdés, mint azt gondolom, akkor nem :D
+
+

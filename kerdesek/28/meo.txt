@@ -1,0 +1,4 @@
+A) igen, lehet ha ugy osztja ki a oprendszer a szalak futasat.
+B) nem, A)
+C) igen, volatile assignment atomi
+D) nem, mert 2 külön fv van.
