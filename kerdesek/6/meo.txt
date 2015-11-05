@@ -1,0 +1,5 @@
+2 Ghost jön létre
+Mindkét Ghost-nak van egy Short objektuma.
+=> 0, 2, vagy 4.
+g2 tartalmazza a másodikként elkészített Ghost-ot, de g1 már nem. g3 is null
+=> 2
