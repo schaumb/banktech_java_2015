@@ -1,0 +1,8 @@
+1) igen, Az Object hashCode és equals függvénye konzisztensen minden objektumra különbözik. 
+2) igen, ahol az object-ek .equals() - ok, ott a hashcode megegyezik.
+3) nem, ugyanannak az objektumnak kugyanazt a hashcode-ot kell visszaadnia
+4) igen, mindig ugyan azt adja vissza, ez megfelel
+5) nem, mert 
+	"Whenever it is invoked on the same object more than once during an execution of a Java application, the hashCode method must consistently return the same integer"
+	nem érvényes, évforduláskor használva ugyan azt a programot más eredményt ad
+6) nem, mert equals() objektumokra nem konzisztens a hashCode()
