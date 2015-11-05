@@ -1,0 +1,3 @@
+ez a probléma c++-ban is. Mi van, ha más static{} blokkok használják ezt az instance-t, és előbb futnak le?
+
+d - ről nem tudok nyilatkozni
