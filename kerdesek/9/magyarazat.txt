@@ -1,0 +1,1 @@
+A try-nak megadott cuccok bezáródnak automatikusan, de mivel a close felül lett írva hogy dobjob exceptiont, ezért a catch azt elkapja, meg kiirja a nevét.
