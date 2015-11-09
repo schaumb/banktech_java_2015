@@ -17,3 +17,8 @@ true
 false
 true
 false
+
+! UPDATE
+Van egy ilyen mondat a doksiban:
+"This ensures that in most common cases, the behavior will be the desired one, without imposing an undue performance penalty, especially on small devices. Less memory-limited implementations might, for example, cache all char and short values, as well as int and long values in the range of -32K to +32K.
+Emiatt a 2. meg a 4. lehet false is. 
