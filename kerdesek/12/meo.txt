@@ -1,1 +1,36 @@
 nem próbáltam, ez lenne az ésszerű
+
+! Update zsmester:
+// 1
+{
+	long num = Long.parseUnsignedLong("18446744073709551615");
+	System.out.println(Long.toUnsignedString(num));
+	long x = num;
+	System.out.println(x);
+	double y = (double) num;
+	long z = num - 1;
+	System.out.println(
+			(x == y ? "x==y " : "x!=y ") + (y == z ? "y==z " : "y!=z ") + (x == z ? "x==z " : "x!=z "));
+}
+// 2
+{
+	System.out.println((Long.MAX_VALUE > Double.MAX_VALUE));
+	System.out.println((Long.MIN_VALUE < Double.MIN_VALUE));
+	long num = Long.MIN_VALUE;
+	long x = num;
+	double y = (double) num;
+	long z = num - 1;
+	System.out.println(
+			(x == y ? "x==y " : "x!=y ") + (y == z ? "y==z " : "y!=z ") + (x == z ? "x==z " : "x!=z "));
+}
+// 1 és 2 => x == y
+
+// z != x tuti
+
+// 3
+{
+	long num = Long.MAX_VALUE; // vagy 0
+	double y = (double) num;
+	long z = num - 1;
+	System.out.println(y == z ? "y==z " : "y!=z "); // első esetben true, másdoikban false
+}
