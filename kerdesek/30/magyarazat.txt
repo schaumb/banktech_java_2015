@@ -1,0 +1,1 @@
+A kommentek igazából nem kommentek, javás hülyeség miatt, így azt fogja kiírni, ami a vágólapon van, ha az string, amúgy meg azt hogy hello world. Sõt, ha string volt, felül is írja a vágólapot a banktech java challenge szöveggel.
