@@ -1,0 +1,3 @@
+Ez a savepoint-os cucc felesleges, semmit nem befolyásol, a rollback-ek nem is kell paraméter.
+A rollback az adott tranzakcióban minden visszavon.
+Akkor lesz hiba dobva, ha a connection autocommites, ezt nem irták pontosan, lehet meg kéne azért kérdezni, mert akkor a helyes válasz az sqlexception lesz.
