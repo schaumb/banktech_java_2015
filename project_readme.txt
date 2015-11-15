@@ -20,7 +20,7 @@ IDEA integráció:
 8. Ugyanitt 'Modules / + / Import module', itt Maven és válasszátok ki a pom.xml-ünket. Majd OK. 
 (Nekem linuxon még az utolsó screen-en az 'Environment settings'-ben a maven verzióját át kellett állítanom a letöltött 3.1.1-re. De ilyenre windowson nem emlékszem. Lehet hogy akkor azért találta meg rögtön a letöltöttet, mert volt egy M2_HOME env var-om).
 
-9. Innen már fodíthattok és futtathattok is command line-ból. De egyszerűbb beállítani egy run configuration-t IDEA-ban: 'Run / Edit configurations... / + / Application'. Itt válasszátok ki a main class-t, az argumentum legyen 'http://javachallenge.loxon.eu:8443/ utinni QKNJ4138' és alul a 'Before launch'-nál adjatok hozzá egy 'clean package' maven goal-t.
+9. Innen már fodíthattok és futtathattok is command line-ból. De egyszerűbb beállítani egy run configuration-t IDEA-ban: 'Run / Edit configurations... / + / Application'. Itt válasszátok ki a main class-t, az argumentum legyen 'http://javachallenge.loxon.hu:8443/engine/CentralControl?wsdl utinni QKNJ4138' és alul a 'Before launch'-nál adjatok hozzá egy 'clean package' maven goal-t.
 
 
 Bean generálás:
