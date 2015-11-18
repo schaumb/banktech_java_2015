@@ -23,12 +23,12 @@ public class Logic {
         System.out.println(getSpaceShuttlePosResponse.getCord().getY());
         GetSpaceShuttleExitPosResponse getSpaceShuttleExitPosResponse = centralControl.getSpaceShuttleExitPos(new GetSpaceShuttleExitPosRequest());
         System.out.println(getSpaceShuttleExitPosResponse.getCord().getX());
-        System.out.println(getSpaceShuttleExitPosResponse.getCord().getY());
-        /*System.out.println(startGameResponse.getUnits().size());
+        System.out.println(getSpaceShuttleExitPosResponse.getCord().getY());*/
+        System.out.println(startGameResponse.getUnits().size());
         for (WsBuilderunit builderUnit : startGameResponse.getUnits()) {
             System.out.println("unit id at start: " + builderUnit.getUnitid());
         }
-        for (int i = 0; i < 100; ++i) {
+        /*for (int i = 0; i < 100; ++i) {
             int actionCostResponse = centralControl.getActionCost(new ActionCostRequest()).getResult().getBuilderUnit();
             System.out.println(actionCostResponse);
             try {
