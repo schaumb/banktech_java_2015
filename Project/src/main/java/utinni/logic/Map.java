@@ -3,13 +3,16 @@ package utinni.logic;
 import eu.loxon.centralcontrol.*;
 import utinni.App;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class Map {
 
     WsCoordinate mapSize;
+    WsCoordinate spaceShuttlePos;
     WsCoordinate spaceShuttleExitPos;
     HashMap<WsCoordinate, Field> knownCoordinates = new HashMap<WsCoordinate, Field>();
     HashMap<Integer, BuilderUnitWrapper> ourUnits = new HashMap<Integer, BuilderUnitWrapper>();
@@ -41,10 +44,11 @@ public class Map {
     }
 
     public void addInfo(GetSpaceShuttlePosResponse getSpaceShuttlePosResponse) {
+        spaceShuttlePos = getSpaceShuttlePosResponse.getCord();
+
         knownCoordinates.put(getSpaceShuttlePosResponse.getCord(),
                 new Field(getSpaceShuttlePosResponse.getCord(),
                         ObjectType.SHUTTLE, App.user, getTick()));
-
     }
 
     public void addInfo(GetSpaceShuttleExitPosResponse getSpaceShuttleExitPosResponse) {
@@ -110,6 +114,14 @@ public class Map {
         return ourUnits.get(unit);
     }
 
+    public boolean isUnitOnShuttle(int unit) {
+        return getUnit(unit).getCoordinate() == spaceShuttlePos;
+    }
+
+    Set<Integer> getMyUnitIds() {
+        return ourUnits.keySet();
+    }
+
     public List<WsDirection> getKnewStepableDirections(WsCoordinate wsCoordinate) {
         List<WsDirection> result = new ArrayList<WsDirection>();
         for(WsDirection wsDirection : WsDirection.values()) {
@@ -121,5 +133,27 @@ public class Map {
         }
 
         return result;
+    }
+
+    void print() {
+        print(System.out);
+    }
+
+    void print(PrintStream out) {
+        WsCoordinate wsCoordinate = new WsCoordinate();
+        for(int x = 0; x < mapSize.getX(); ++x) {
+            wsCoordinate.setX(x);
+            for(int y = 0; y < mapSize.getY(); ++y) {
+
+                wsCoordinate.setY(y);
+                if(knownCoordinates.containsKey(wsCoordinate)) {
+                    out.print(knownCoordinates.get(wsCoordinate).getScouting().getObject().value().charAt(0));
+                }
+                else {
+                    out.print('?');
+                }
+            }
+            out.println();
+        }
     }
 }
