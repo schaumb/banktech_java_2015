@@ -11,23 +11,26 @@ import java.net.URL;
 
 public class App {
 
+
+    static public URL wsUrl;
+    static public String user;
+    static public String password;
     public static void main(String[] args) {
         if (args == null || args.length < 3) {
             System.err.println("Not enough argument.");
             return;
         }
 
-        URL wsUrl;
         try {
             wsUrl = new URL(args[0]);
         } catch (MalformedURLException e) {
             System.err.println("The first param is not a valid URL.");
             return;
         }
-        String user = args[1];
-        String pw = args[2];
+        user = args[1];
+        password = args[2];
 
-        CentralControl centralControl = createCentralControlWithCredentials(wsUrl, user, pw);
+        CentralControl centralControl = createCentralControlWithCredentials(wsUrl, user, password);
         new Logic(centralControl).run();
     }
 
