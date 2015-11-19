@@ -62,8 +62,14 @@ public class Map {
                         getUnit(structureTunnelRequest.getUnit()).getCoordinate(),
                         structureTunnelRequest.getDirection());
 
-                knownCoordinates.get(nextField).setWhen(getTick());
-                knownCoordinates.get(nextField).getScouting().setObject(ObjectType.TUNNEL);
+                Field knownNextField = knownCoordinates.get(nextField);
+                if (knownNextField != null) {
+                    knownNextField.setWhen(getTick());
+                    knownNextField.getScouting().setObject(ObjectType.TUNNEL);
+                } else {
+                    knownCoordinates.put(nextField,
+                            new Field(nextField, ObjectType.TUNNEL, App.user, getTick()));
+                }
             }
         };
     }
@@ -75,8 +81,14 @@ public class Map {
                         getUnit(explodeCellRequest.getUnit()).getCoordinate(),
                         explodeCellRequest.getDirection());
 
-                knownCoordinates.get(nextField).setWhen(getTick());
-                knownCoordinates.get(nextField).getScouting().setObject(ObjectType.ROCK);
+                Field knownNextField = knownCoordinates.get(nextField);
+                if (knownNextField != null) {
+                    knownNextField.setWhen(getTick());
+                    knownNextField.getScouting().setObject(ObjectType.ROCK);
+                } else {
+                    knownCoordinates.put(nextField,
+                            new Field(nextField, ObjectType.ROCK, App.user, getTick()));
+                }
             }
         };
     }
@@ -84,16 +96,24 @@ public class Map {
     public void addCache(final MoveBuilderUnitRequest moveBuilderUnitRequest) {
         runAfterOk = new Runnable() {
             public void run() {
-                Field unit = getUnit(moveBuilderUnitRequest.getUnit());
+                BuilderUnitWrapper unit = (BuilderUnitWrapper) getUnit(moveBuilderUnitRequest.getUnit());
 
                 WsCoordinate nextField = Coordinating.getNextCoordinate(
                         unit.getCoordinate(),
                         moveBuilderUnitRequest.getDirection());
 
-                knownCoordinates.remove(unit.getCoordinate());
+                // Updates the current field
+                Field currentField = knownCoordinates.remove(unit.getCoordinate());
+                Field updatedCurrentField = new Field(currentField);
+                updatedCurrentField.getScouting()
+                        .setObject(isUnitOnShuttle(unit.getUnitId()) ? ObjectType.SHUTTLE : ObjectType.TUNNEL);
+                knownCoordinates.put(updatedCurrentField.getCoordinate(), updatedCurrentField);
 
+                // Adds the new field
                 unit.setWhen(getTick());
                 unit.getScouting().setCord(nextField);
+                unit.getScouting().setObject(ObjectType.BUILDER_UNIT);
+                unit.getScouting().setTeam(App.user);
                 knownCoordinates.put(nextField, unit);
             }
         };
@@ -122,8 +142,8 @@ public class Map {
         return ourUnits.keySet();
     }
 
-    public List<WsDirection> getKnewStepableDirections(WsCoordinate wsCoordinate) {
-        List<WsDirection> result = new ArrayList<WsDirection>();
+    public List<WsDirection> getKnownSteppableDirections(WsCoordinate wsCoordinate) {
+        List<WsDirection> result = new ArrayList<>();
         for(WsDirection wsDirection : WsDirection.values()) {
             WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(wsCoordinate, wsDirection);
             if(knownCoordinates.containsKey(nextCoordinate) &&

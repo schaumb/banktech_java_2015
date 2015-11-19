@@ -1,0 +1,7 @@
+Feladatok:
+- Map: Az aktuálisan ismert térkép táralása, kezelése és kiíratása.
+- Wrapper és Util osztályok.
+- Kilépő kezdő logika. az első pár kör logikája.
+- Globális eseménykezelő: idő, támadás, server válaszok kezelése, pontok kezelés, melyik körben járunk, stb...
+- Az építők logikája.
+
