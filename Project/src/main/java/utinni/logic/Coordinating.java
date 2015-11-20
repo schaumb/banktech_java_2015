@@ -30,6 +30,28 @@ public class Coordinating {
         return result;
     }
 
+    public static WsDirection getDirection(WsCoordinate from, WsCoordinate to) {
+        if(distance(from, to) != 1) {
+            return null;
+        }
+
+        switch(to.getX() - from.getX()) {
+            case 1:
+                return WsDirection.RIGHT;
+            case -1:
+                return WsDirection.LEFT;
+            default:
+                switch (to.getY() - from.getY()) {
+                    case 1:
+                        return WsDirection.UP;
+                    case -1:
+                        return WsDirection.DOWN;
+                    default:
+                        return null;
+                }
+        }
+    }
+
     public static int distance(WsCoordinate coord1, WsCoordinate coord2) {
         return Math.abs(coord1.getX() - coord2.getX()) + Math.abs(coord1.getY() - coord2.getY());
     }

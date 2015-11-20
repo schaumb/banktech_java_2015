@@ -55,13 +55,17 @@ public class Map {
     public void addInfo(GetSpaceShuttlePosResponse getSpaceShuttlePosResponse) {
         spaceShuttlePos = getSpaceShuttlePosResponse.getCord();
 
-        knownCoordinates.put(getSpaceShuttlePosResponse.getCord(),
-                new Field(getSpaceShuttlePosResponse.getCord(),
+        knownCoordinates.put(spaceShuttlePos,
+                new Field(spaceShuttlePos,
                         ObjectType.SHUTTLE, App.user, getTick()));
     }
 
     public void addInfo(GetSpaceShuttleExitPosResponse getSpaceShuttleExitPosResponse) {
-        this.spaceShuttleExitPos = getSpaceShuttleExitPosResponse.getCord();
+        spaceShuttleExitPos = getSpaceShuttleExitPosResponse.getCord();
+
+        knownCoordinates.put(spaceShuttleExitPos,
+                new Field(spaceShuttleExitPos,
+                        ObjectType.ROCK, null, getTick()));
     }
 
     public void addCache(StructureTunnelRequest structureTunnelRequest) {
@@ -115,11 +119,25 @@ public class Map {
     public Field getUnit(int unit) {
         return ourUnits.get(unit);
     }
+    public Field getField(WsCoordinate wsCoordinate) {
+        return knownCoordinates.get(wsCoordinate);
+    }
+    public Field getField(int x, int y) {
+        WsCoordinate wsCoordinate = new WsCoordinate();
+        wsCoordinate.setX(x);
+        wsCoordinate.setX(y);
+        return getField(wsCoordinate);
+    }
 
     public boolean isUnitOnShuttle(int unit) {
         return getUnit(unit).getCoordinate() == spaceShuttlePos;
     }
-
+    public WsDirection getDirectionFromShuttle() {
+        return Coordinating.getDirection(spaceShuttlePos, spaceShuttleExitPos);
+    }
+    public Field getSpaceShuttleExitField() {
+        return knownCoordinates.get(spaceShuttleExitPos);
+    }
     Set<Integer> getMyUnitIds() {
         return ourUnits.keySet();
     }
