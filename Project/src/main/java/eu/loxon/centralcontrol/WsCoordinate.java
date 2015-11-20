@@ -4,6 +4,7 @@ package eu.loxon.centralcontrol;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
+import java.util.Arrays;
 
 
 /**
@@ -68,4 +69,29 @@ public class WsCoordinate {
         this.y = value;
     }
 
+    @Override
+    public boolean equals(Object rawOther) {
+        if (rawOther == null) {
+            return false;
+        }
+
+        if (rawOther == this) {
+            return true;
+        }
+
+        if (!(rawOther instanceof WsCoordinate)) {
+            return false;
+        }
+
+        WsCoordinate other = (WsCoordinate) rawOther;
+
+        return other.x == this.x && other.y == this.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(new int[]{
+                x, y
+        });
+    }
 }

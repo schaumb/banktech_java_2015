@@ -102,18 +102,10 @@ public class Map {
                         unit.getCoordinate(),
                         moveBuilderUnitRequest.getDirection());
 
-                // Updates the current field
-                Field currentField = knownCoordinates.remove(unit.getCoordinate());
-                Field updatedCurrentField = new Field(currentField);
-                updatedCurrentField.getScouting()
-                        .setObject(isUnitOnShuttle(unit.getUnitId()) ? ObjectType.SHUTTLE : ObjectType.TUNNEL);
-                knownCoordinates.put(updatedCurrentField.getCoordinate(), updatedCurrentField);
+                knownCoordinates.remove(unit.getCoordinate());
 
-                // Adds the new field
                 unit.setWhen(getTick());
                 unit.getScouting().setCord(nextField);
-                unit.getScouting().setObject(ObjectType.BUILDER_UNIT);
-                unit.getScouting().setTeam(App.user);
                 knownCoordinates.put(nextField, unit);
             }
         };
