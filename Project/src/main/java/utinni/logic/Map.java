@@ -8,20 +8,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Map {
 
     WsCoordinate mapSize;
     WsCoordinate spaceShuttlePos;
     WsCoordinate spaceShuttleExitPos;
-    HashMap<WsCoordinate, Field> knownCoordinates = new HashMap<WsCoordinate, Field>();
-    HashMap<Integer, BuilderUnitWrapper> ourUnits = new HashMap<Integer, BuilderUnitWrapper>();
+    HashMap<WsCoordinate, Field> knownCoordinates = new HashMap<>();
+    HashMap<Integer, BuilderUnitWrapper> ourUnits = new HashMap<>();
     Runnable runAfterOk;
+    Runnable runAfterNOk;
 
     public void acceptCache(CommonResp commonResp) {
-        if(commonResp.getType() == ResultType.DONE && runAfterOk != null) {
-            runAfterOk.run();
+        if(commonResp.getType() == ResultType.DONE) {
+            if(runAfterOk != null) {
+                runAfterOk.run();
+            }
         }
+        else if(runAfterNOk != null) {
+            runAfterNOk.run();
+        }
+        runAfterNOk = null;
         runAfterOk = null;
     }
 
@@ -55,60 +64,41 @@ public class Map {
         this.spaceShuttleExitPos = getSpaceShuttleExitPosResponse.getCord();
     }
 
-    public void addCache(final StructureTunnelRequest structureTunnelRequest) {
-        runAfterOk = new Runnable() {
-            public void run() {
-                WsCoordinate nextField = Coordinating.getNextCoordinate(
-                        getUnit(structureTunnelRequest.getUnit()).getCoordinate(),
-                        structureTunnelRequest.getDirection());
+    public void addCache(StructureTunnelRequest structureTunnelRequest) {
+        WsCoordinate nextField = Coordinating.getNextCoordinate(
+                getUnit(structureTunnelRequest.getUnit()).getCoordinate(),
+                structureTunnelRequest.getDirection());
 
-                Field knownNextField = knownCoordinates.get(nextField);
-                if (knownNextField != null) {
-                    knownNextField.setWhen(getTick());
-                    knownNextField.getScouting().setObject(ObjectType.TUNNEL);
-                } else {
-                    knownCoordinates.put(nextField,
-                            new Field(nextField, ObjectType.TUNNEL, App.user, getTick()));
-                }
-            }
-        };
+        runAfterOk = () -> knownCoordinates.put(nextField,
+                new Field(nextField, ObjectType.TUNNEL, App.user, getTick()));
+        runAfterNOk = () -> knownCoordinates.remove(nextField);
     }
 
-    public void addCache(final ExplodeCellRequest explodeCellRequest) {
-        runAfterOk = new Runnable() {
-            public void run() {
-                WsCoordinate nextField = Coordinating.getNextCoordinate(
-                        getUnit(explodeCellRequest.getUnit()).getCoordinate(),
-                        explodeCellRequest.getDirection());
+    public void addCache(ExplodeCellRequest explodeCellRequest) {
+        WsCoordinate nextField = Coordinating.getNextCoordinate(
+                getUnit(explodeCellRequest.getUnit()).getCoordinate(),
+                explodeCellRequest.getDirection());
 
-                Field knownNextField = knownCoordinates.get(nextField);
-                if (knownNextField != null) {
-                    knownNextField.setWhen(getTick());
-                    knownNextField.getScouting().setObject(ObjectType.ROCK);
-                } else {
-                    knownCoordinates.put(nextField,
-                            new Field(nextField, ObjectType.ROCK, App.user, getTick()));
-                }
-            }
-        };
+        runAfterOk = () -> knownCoordinates.put(nextField,
+                new Field(nextField, ObjectType.ROCK, null, getTick()));
+        runAfterNOk = () -> knownCoordinates.remove(nextField);
     }
 
-    public void addCache(final MoveBuilderUnitRequest moveBuilderUnitRequest) {
-        runAfterOk = new Runnable() {
-            public void run() {
-                BuilderUnitWrapper unit = (BuilderUnitWrapper) getUnit(moveBuilderUnitRequest.getUnit());
+    public void addCache(MoveBuilderUnitRequest moveBuilderUnitRequest) {
+        BuilderUnitWrapper unit = (BuilderUnitWrapper) getUnit(moveBuilderUnitRequest.getUnit());
+        WsCoordinate nextField = Coordinating.getNextCoordinate(
+                unit.getCoordinate(),
+                moveBuilderUnitRequest.getDirection());
 
-                WsCoordinate nextField = Coordinating.getNextCoordinate(
-                        unit.getCoordinate(),
-                        moveBuilderUnitRequest.getDirection());
+        runAfterOk = () -> {
+            knownCoordinates.put(unit.getCoordinate(), new Field(unit.getCoordinate(),
+                    ObjectType.TUNNEL, App.user, getTick()));
 
-                knownCoordinates.remove(unit.getCoordinate());
-
-                unit.setWhen(getTick());
-                unit.getScouting().setCord(nextField);
-                knownCoordinates.put(nextField, unit);
-            }
+            unit.setWhen(getTick());
+            unit.getScouting().setCord(nextField);
+            knownCoordinates.put(nextField, unit);
         };
+        runAfterNOk = () -> knownCoordinates.remove(nextField);
     }
 
     private void setScouts(List<Scouting> scouts) {
@@ -134,17 +124,34 @@ public class Map {
         return ourUnits.keySet();
     }
 
-    public List<WsDirection> getKnownSteppableDirections(WsCoordinate wsCoordinate) {
+    private List<WsDirection> getDirectionsWithCondition(WsCoordinate wsCoordinate, Predicate<Field> predicate) {
         List<WsDirection> result = new ArrayList<>();
         for(WsDirection wsDirection : WsDirection.values()) {
             WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(wsCoordinate, wsDirection);
-            if(knownCoordinates.containsKey(nextCoordinate) &&
-                    knownCoordinates.get(nextCoordinate).isSteppable()) {
+            if(predicate.test(knownCoordinates.get(nextCoordinate))) {
                 result.add(wsDirection);
             }
         }
 
         return result;
+    }
+
+    public List<WsDirection> getKnownSteppableDirections(WsCoordinate wsCoordinate) {
+        return getDirectionsWithCondition(wsCoordinate, (Field field) -> field != null && field.isSteppable());
+    }
+
+    public List<WsDirection> getKnownTunnelableDirections(WsCoordinate wsCoordinate) {
+        return getDirectionsWithCondition(wsCoordinate, (Field field) -> field != null && field.isTunnelable());
+    }
+
+    public List<WsDirection> getKnownExplodableDirections(WsCoordinate wsCoordinate) {
+        return getDirectionsWithCondition(wsCoordinate, (Field field) -> field != null && field.isExpodable());
+    }
+
+    public List<WsCoordinate> getUnknownCoordinates(WsCoordinate from, int maxDistance) {
+        return Coordinating.getCoordinatesToRadius(from, maxDistance).stream()
+                .filter((WsCoordinate wsCoordinate) -> !knownCoordinates.containsKey(wsCoordinate))
+                .collect(Collectors.toList());
     }
 
     void print() {

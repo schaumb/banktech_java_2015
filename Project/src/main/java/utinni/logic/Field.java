@@ -23,17 +23,6 @@ public class Field {
         setWhen(when);
     }
 
-    public Field(Field other) {
-        scouting = new Scouting();
-        WsCoordinate coord = new WsCoordinate();
-        coord.setX(other.getCoordinate().getX());
-        coord.setY(other.getCoordinate().getY());
-        scouting.setCord(coord);
-        scouting.setObject(other.getObjectType());
-        scouting.setTeam(other.getTeam());
-        other.when = when;
-    }
-
     private ObjectType getObjectType() {
         return scouting.getObject();
     }
