@@ -5,6 +5,7 @@ import eu.loxon.centralcontrol.WsDirection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class Coordinating {
 
@@ -52,7 +53,7 @@ public class Coordinating {
         }
     }
 
-    public static int distance(WsCoordinate coord1, WsCoordinate coord2) {
+    public static Integer distance(WsCoordinate coord1, WsCoordinate coord2) {
         return Math.abs(coord1.getX() - coord2.getX()) + Math.abs(coord1.getY() - coord2.getY());
     }
 
@@ -62,6 +63,19 @@ public class Coordinating {
         for(int x = wsCoordinate.getX() - radius; x <= wsCoordinate.getX() + radius; ++x) {
             int maxYRadius = radius - Math.abs(x - wsCoordinate.getX());
             for(int y = wsCoordinate.getY() - maxYRadius; y <= wsCoordinate.getY() + maxYRadius; ++y) {
+                WsCoordinate tempCoordinate = new WsCoordinate();
+                tempCoordinate.setX(x);
+                tempCoordinate.setY(y);
+                result.add(tempCoordinate);
+            }
+        }
+        return result;
+    }
+
+    public static List<WsCoordinate> getBoxCoordinates(WsCoordinate wsCoordinate, int radius) {
+        List<WsCoordinate> result = new ArrayList<>();
+        for(int x = wsCoordinate.getX() - radius; x <= wsCoordinate.getX() + radius; ++x) {
+            for(int y = wsCoordinate.getY() - radius; y <= wsCoordinate.getY() + radius; ++y) {
                 WsCoordinate tempCoordinate = new WsCoordinate();
                 tempCoordinate.setX(x);
                 tempCoordinate.setY(y);

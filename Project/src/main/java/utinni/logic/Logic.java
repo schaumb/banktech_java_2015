@@ -3,6 +3,7 @@ package utinni.logic;
 
 import eu.loxon.centralcontrol.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -123,6 +124,27 @@ public class Logic {
                         break;
                     }
                 }
+
+                if(actionCostResponse.getRadar() > 0) {
+                    int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
+                    if (maxCanRadar > 0) {
+                        WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
+                        List<WsCoordinate> otherUnknowns =
+                                map.getCoordinatesCanRadar(nextUnitId,
+                                        (Field field) -> field == null,
+                                        (WsCoordinate c1, WsCoordinate c2) ->
+                                                Coordinating.distance(c1, unitCoordinate).compareTo(
+                                                        Coordinating.distance(c2, unitCoordinate)),
+                                        maxCanRadar);
+                        tryRadar(nextUnitId, otherUnknowns);
+                    }
+                }
+                else {
+                    tryRadar(nextUnitId, map.getCoordinatesCanRadar(nextUnitId,
+                            (a) -> true,
+                            (a, b) -> 0,
+                            49));
+                }
             }
             Map.advanceTick();
 
@@ -139,6 +161,7 @@ public class Logic {
             Set<Integer> ids = map.getMyUnitIds();
             while(ids.size() > 0) {
                 map.print();
+                System.out.println(map.getLastCommonResponse().toString());
                 Integer nextUnitId = sleepWhile(ids);
                 ids.remove(nextUnitId);
                 System.out.println("NextUnitId: " + nextUnitId);
@@ -212,7 +235,9 @@ public class Logic {
             WatchRequest watchRequest = new WatchRequest();
             watchRequest.setUnit(unitId);
 
+            System.out.println(watchRequest);
             WatchResponse watchResponse = centralControl.watch(watchRequest);
+            System.out.println(watchResponse);
 
             map.addInfo(watchResponse);
 
@@ -296,24 +321,29 @@ public class Logic {
     }
 
     public boolean tryRadar(int unitId, int radius) {
-        // if we have enough energy to radar some cells
         List<WsCoordinate> unknownCoordinates = map.getUnknownCoordinates(
                 map.getUnit(unitId).getCoordinate(), radius);
 
-        if(map.getLastCommonResponse().getActionPointsLeft() >=
-                        unknownCoordinates.size() * actionCostResponse.getRadar()) {
+        return tryRadar(unitId, unknownCoordinates);
+    }
 
-            if(unknownCoordinates.size() == 0) {
+    public boolean tryRadar(int unitId, List<WsCoordinate> coordinates) {
+        // if we have enough energy to radar some cells
+        if(map.getLastCommonResponse().getActionPointsLeft() >=
+                coordinates.size() * actionCostResponse.getRadar()) {
+
+            if(coordinates.size() == 0) {
                 return true;
             }
 
             RadarRequest radarRequest = new RadarRequest();
             radarRequest.setUnit(unitId);
-            for(WsCoordinate wsCoordinate : unknownCoordinates) {
+            for(WsCoordinate wsCoordinate : coordinates) {
                 radarRequest.getCord().add(wsCoordinate);
             }
-
+            System.out.println(radarRequest);
             RadarResponse radarResponse = centralControl.radar(radarRequest);
+            System.out.println(radarResponse);
 
             map.addInfo(radarResponse);
 

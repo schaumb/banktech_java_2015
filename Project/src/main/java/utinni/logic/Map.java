@@ -21,10 +21,7 @@ public class Map {
 
     public boolean acceptCache(CommonResp commonResp) {
         lastCommonResponse = commonResp;
-        if(commonResp.getType() != ResultType.DONE) {
-            System.out.println("RESULT IS: " +commonResp.getType().value());
-            System.out.println("WHY: " +commonResp.getMessage());
-        }
+        System.out.println(commonResp);
 
         if(commonResp.getType() == ResultType.DONE) {
             if(runAfterOk != null) {
@@ -81,7 +78,7 @@ public class Map {
     public void addInfo(GetSpaceShuttleExitPosResponse getSpaceShuttleExitPosResponse) {
         spaceShuttleExitPos = getSpaceShuttleExitPosResponse.getCord();
 
-        if(!knownCoordinates.containsKey(spaceShuttleExitPos)) {
+        if(isReallyFirstTick()) {
             knownCoordinates.put(spaceShuttleExitPos,
                     new Field(spaceShuttleExitPos,
                             ObjectType.ROCK, null, getTick()));
@@ -93,6 +90,7 @@ public class Map {
     }
 
     public void addCache(StructureTunnelRequest structureTunnelRequest) {
+        System.out.println(structureTunnelRequest);
         WsCoordinate nextField = Coordinating.getNextCoordinate(
                 getUnit(structureTunnelRequest.getUnit()).getCoordinate(),
                 structureTunnelRequest.getDirection());
@@ -103,6 +101,7 @@ public class Map {
     }
 
     public void addCache(ExplodeCellRequest explodeCellRequest) {
+        System.out.println(explodeCellRequest);
         WsCoordinate nextField = Coordinating.getNextCoordinate(
                 getUnit(explodeCellRequest.getUnit()).getCoordinate(),
                 explodeCellRequest.getDirection());
@@ -113,6 +112,7 @@ public class Map {
     }
 
     public void addCache(MoveBuilderUnitRequest moveBuilderUnitRequest) {
+        System.out.println(moveBuilderUnitRequest);
         BuilderUnitWrapper unit = (BuilderUnitWrapper) getUnit(moveBuilderUnitRequest.getUnit());
         WsCoordinate nextField = Coordinating.getNextCoordinate(
                 unit.getCoordinate(),
@@ -146,7 +146,7 @@ public class Map {
     public Field getField(int x, int y) {
         WsCoordinate wsCoordinate = new WsCoordinate();
         wsCoordinate.setX(x);
-        wsCoordinate.setX(y);
+        wsCoordinate.setY(y);
         return getField(wsCoordinate);
     }
 
@@ -212,8 +212,22 @@ public class Map {
     }
 
     public List<WsCoordinate> getUnknownCoordinates(WsCoordinate from, int maxDistance) {
+        if(maxDistance > 3) {
+            System.out.println("Max distance set bigger than 3 - reduce to 3");
+            maxDistance = 3;
+        }
         return Coordinating.getCoordinatesToRadius(from, maxDistance).stream()
                 .filter((WsCoordinate wsCoordinate) -> !knownCoordinates.containsKey(wsCoordinate))
+                .collect(Collectors.toList());
+    }
+
+    public List<WsCoordinate> getCoordinatesCanRadar(int unitId, Predicate<Field> predicate, Comparator<WsCoordinate> comparator, int max) {
+        WsCoordinate unitCoordinates = getUnit(unitId).getCoordinate();
+        return Coordinating.getBoxCoordinates(unitCoordinates, 3).stream()
+                .filter((WsCoordinate wsCoordinate) -> !wsCoordinate.equals(unitCoordinates))
+                .filter((WsCoordinate wsCoordinate) -> predicate.test(knownCoordinates.get(wsCoordinate)))
+                .sorted(comparator)
+                .limit(max)
                 .collect(Collectors.toList());
     }
 
@@ -226,14 +240,22 @@ public class Map {
     }
 
     void print(PrintStream out) {
-        WsCoordinate wsCoordinate = new WsCoordinate();
         for(int x = 0; x < mapSize.getX(); ++x) {
-            wsCoordinate.setX(x);
             for(int y = 0; y < mapSize.getY(); ++y) {
+                Field field = getField(x, y);
 
-                wsCoordinate.setY(y);
-                if(knownCoordinates.containsKey(wsCoordinate)) {
-                    out.print(knownCoordinates.get(wsCoordinate).getScouting().getObject().value().charAt(0));
+                if(field != null) {
+                    if(field.isControllable()) {
+                        for(java.util.Map.Entry entry : ourUnits.entrySet()) {
+                            if(((Field)entry.getValue()).getCoordinate().equals(field.getCoordinate())) {
+                                out.print(entry.getKey());
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        out.print(field.getScouting().getObject().value().charAt(0));
+                    }
                 }
                 else {
                     out.print('?');
