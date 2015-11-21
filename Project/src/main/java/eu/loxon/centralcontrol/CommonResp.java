@@ -4,8 +4,18 @@ package eu.loxon.centralcontrol;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
+import org.jvnet.jaxb2_commons.lang.Equals;
+import org.jvnet.jaxb2_commons.lang.EqualsStrategy;
+import org.jvnet.jaxb2_commons.lang.HashCode;
+import org.jvnet.jaxb2_commons.lang.HashCodeStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBHashCodeStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBToStringStrategy;
+import org.jvnet.jaxb2_commons.lang.ToString;
+import org.jvnet.jaxb2_commons.lang.ToStringStrategy;
+import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
 
 
 /**
@@ -45,13 +55,13 @@ import javax.xml.bind.annotation.XmlType;
     "code",
     "score"
 })
-public class CommonResp {
+public class CommonResp implements Equals, HashCode, ToString
+{
 
     protected int actionPointsLeft;
     protected int explosivesLeft;
     protected int turnsLeft;
     @XmlElement(required = true)
-    @XmlSchemaType(name = "string")
     protected ResultType type;
     protected int builderUnit;
     @XmlElement(required = true)
@@ -60,6 +70,29 @@ public class CommonResp {
     protected String code;
     @XmlElement(required = true)
     protected WsScore score;
+
+    /**
+     * Default no-arg constructor
+     * 
+     */
+    public CommonResp() {
+        super();
+    }
+
+    /**
+     * Fully-initialising value constructor
+     * 
+     */
+    public CommonResp(final int actionPointsLeft, final int explosivesLeft, final int turnsLeft, final ResultType type, final int builderUnit, final String message, final String code, final WsScore score) {
+        this.actionPointsLeft = actionPointsLeft;
+        this.explosivesLeft = explosivesLeft;
+        this.turnsLeft = turnsLeft;
+        this.type = type;
+        this.builderUnit = builderUnit;
+        this.message = message;
+        this.code = code;
+        this.score = score;
+    }
 
     /**
      * Gets the value of the actionPointsLeft property.
@@ -219,6 +252,202 @@ public class CommonResp {
      */
     public void setScore(WsScore value) {
         this.score = value;
+    }
+
+    public String toString() {
+        final ToStringStrategy strategy = JAXBToStringStrategy.INSTANCE;
+        final StringBuilder buffer = new StringBuilder();
+        append(null, buffer, strategy);
+        return buffer.toString();
+    }
+
+    public StringBuilder append(ObjectLocator locator, StringBuilder buffer, ToStringStrategy strategy) {
+        strategy.appendStart(locator, this, buffer);
+        appendFields(locator, buffer, strategy);
+        strategy.appendEnd(locator, this, buffer);
+        return buffer;
+    }
+
+    public StringBuilder appendFields(ObjectLocator locator, StringBuilder buffer, ToStringStrategy strategy) {
+        {
+            int theActionPointsLeft;
+            theActionPointsLeft = this.getActionPointsLeft();
+            strategy.appendField(locator, this, "actionPointsLeft", buffer, theActionPointsLeft);
+        }
+        {
+            int theExplosivesLeft;
+            theExplosivesLeft = this.getExplosivesLeft();
+            strategy.appendField(locator, this, "explosivesLeft", buffer, theExplosivesLeft);
+        }
+        {
+            int theTurnsLeft;
+            theTurnsLeft = this.getTurnsLeft();
+            strategy.appendField(locator, this, "turnsLeft", buffer, theTurnsLeft);
+        }
+        {
+            ResultType theType;
+            theType = this.getType();
+            strategy.appendField(locator, this, "type", buffer, theType);
+        }
+        {
+            int theBuilderUnit;
+            theBuilderUnit = this.getBuilderUnit();
+            strategy.appendField(locator, this, "builderUnit", buffer, theBuilderUnit);
+        }
+        {
+            String theMessage;
+            theMessage = this.getMessage();
+            strategy.appendField(locator, this, "message", buffer, theMessage);
+        }
+        {
+            String theCode;
+            theCode = this.getCode();
+            strategy.appendField(locator, this, "code", buffer, theCode);
+        }
+        {
+            WsScore theScore;
+            theScore = this.getScore();
+            strategy.appendField(locator, this, "score", buffer, theScore);
+        }
+        return buffer;
+    }
+
+    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy strategy) {
+        if (!(object instanceof CommonResp)) {
+            return false;
+        }
+        if (this == object) {
+            return true;
+        }
+        final CommonResp that = ((CommonResp) object);
+        {
+            int lhsActionPointsLeft;
+            lhsActionPointsLeft = this.getActionPointsLeft();
+            int rhsActionPointsLeft;
+            rhsActionPointsLeft = that.getActionPointsLeft();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "actionPointsLeft", lhsActionPointsLeft), LocatorUtils.property(thatLocator, "actionPointsLeft", rhsActionPointsLeft), lhsActionPointsLeft, rhsActionPointsLeft)) {
+                return false;
+            }
+        }
+        {
+            int lhsExplosivesLeft;
+            lhsExplosivesLeft = this.getExplosivesLeft();
+            int rhsExplosivesLeft;
+            rhsExplosivesLeft = that.getExplosivesLeft();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "explosivesLeft", lhsExplosivesLeft), LocatorUtils.property(thatLocator, "explosivesLeft", rhsExplosivesLeft), lhsExplosivesLeft, rhsExplosivesLeft)) {
+                return false;
+            }
+        }
+        {
+            int lhsTurnsLeft;
+            lhsTurnsLeft = this.getTurnsLeft();
+            int rhsTurnsLeft;
+            rhsTurnsLeft = that.getTurnsLeft();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "turnsLeft", lhsTurnsLeft), LocatorUtils.property(thatLocator, "turnsLeft", rhsTurnsLeft), lhsTurnsLeft, rhsTurnsLeft)) {
+                return false;
+            }
+        }
+        {
+            ResultType lhsType;
+            lhsType = this.getType();
+            ResultType rhsType;
+            rhsType = that.getType();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "type", lhsType), LocatorUtils.property(thatLocator, "type", rhsType), lhsType, rhsType)) {
+                return false;
+            }
+        }
+        {
+            int lhsBuilderUnit;
+            lhsBuilderUnit = this.getBuilderUnit();
+            int rhsBuilderUnit;
+            rhsBuilderUnit = that.getBuilderUnit();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "builderUnit", lhsBuilderUnit), LocatorUtils.property(thatLocator, "builderUnit", rhsBuilderUnit), lhsBuilderUnit, rhsBuilderUnit)) {
+                return false;
+            }
+        }
+        {
+            String lhsMessage;
+            lhsMessage = this.getMessage();
+            String rhsMessage;
+            rhsMessage = that.getMessage();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "message", lhsMessage), LocatorUtils.property(thatLocator, "message", rhsMessage), lhsMessage, rhsMessage)) {
+                return false;
+            }
+        }
+        {
+            String lhsCode;
+            lhsCode = this.getCode();
+            String rhsCode;
+            rhsCode = that.getCode();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "code", lhsCode), LocatorUtils.property(thatLocator, "code", rhsCode), lhsCode, rhsCode)) {
+                return false;
+            }
+        }
+        {
+            WsScore lhsScore;
+            lhsScore = this.getScore();
+            WsScore rhsScore;
+            rhsScore = that.getScore();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "score", lhsScore), LocatorUtils.property(thatLocator, "score", rhsScore), lhsScore, rhsScore)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean equals(Object object) {
+        final EqualsStrategy strategy = JAXBEqualsStrategy.INSTANCE;
+        return equals(null, null, object, strategy);
+    }
+
+    public int hashCode(ObjectLocator locator, HashCodeStrategy strategy) {
+        int currentHashCode = 1;
+        {
+            int theActionPointsLeft;
+            theActionPointsLeft = this.getActionPointsLeft();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "actionPointsLeft", theActionPointsLeft), currentHashCode, theActionPointsLeft);
+        }
+        {
+            int theExplosivesLeft;
+            theExplosivesLeft = this.getExplosivesLeft();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "explosivesLeft", theExplosivesLeft), currentHashCode, theExplosivesLeft);
+        }
+        {
+            int theTurnsLeft;
+            theTurnsLeft = this.getTurnsLeft();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "turnsLeft", theTurnsLeft), currentHashCode, theTurnsLeft);
+        }
+        {
+            ResultType theType;
+            theType = this.getType();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "type", theType), currentHashCode, theType);
+        }
+        {
+            int theBuilderUnit;
+            theBuilderUnit = this.getBuilderUnit();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "builderUnit", theBuilderUnit), currentHashCode, theBuilderUnit);
+        }
+        {
+            String theMessage;
+            theMessage = this.getMessage();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "message", theMessage), currentHashCode, theMessage);
+        }
+        {
+            String theCode;
+            theCode = this.getCode();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "code", theCode), currentHashCode, theCode);
+        }
+        {
+            WsScore theScore;
+            theScore = this.getScore();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "score", theScore), currentHashCode, theScore);
+        }
+        return currentHashCode;
+    }
+
+    public int hashCode() {
+        final HashCodeStrategy strategy = JAXBHashCodeStrategy.INSTANCE;
+        return this.hashCode(null, strategy);
     }
 
 }

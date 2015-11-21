@@ -6,6 +6,17 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import org.jvnet.jaxb2_commons.lang.Equals;
+import org.jvnet.jaxb2_commons.lang.EqualsStrategy;
+import org.jvnet.jaxb2_commons.lang.HashCode;
+import org.jvnet.jaxb2_commons.lang.HashCodeStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBHashCodeStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBToStringStrategy;
+import org.jvnet.jaxb2_commons.lang.ToString;
+import org.jvnet.jaxb2_commons.lang.ToStringStrategy;
+import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
 
 
 /**
@@ -34,12 +45,30 @@ import javax.xml.bind.annotation.XmlType;
     "result"
 })
 @XmlRootElement(name = "getSpaceShuttleExitPosResponse")
-public class GetSpaceShuttleExitPosResponse {
+public class GetSpaceShuttleExitPosResponse implements Equals, HashCode, ToString
+{
 
     @XmlElement(required = true)
     protected WsCoordinate cord;
     @XmlElement(required = true)
     protected CommonResp result;
+
+    /**
+     * Default no-arg constructor
+     * 
+     */
+    public GetSpaceShuttleExitPosResponse() {
+        super();
+    }
+
+    /**
+     * Fully-initialising value constructor
+     * 
+     */
+    public GetSpaceShuttleExitPosResponse(final WsCoordinate cord, final CommonResp result) {
+        this.cord = cord;
+        this.result = result;
+    }
 
     /**
      * Gets the value of the cord property.
@@ -87,6 +116,88 @@ public class GetSpaceShuttleExitPosResponse {
      */
     public void setResult(CommonResp value) {
         this.result = value;
+    }
+
+    public String toString() {
+        final ToStringStrategy strategy = JAXBToStringStrategy.INSTANCE;
+        final StringBuilder buffer = new StringBuilder();
+        append(null, buffer, strategy);
+        return buffer.toString();
+    }
+
+    public StringBuilder append(ObjectLocator locator, StringBuilder buffer, ToStringStrategy strategy) {
+        strategy.appendStart(locator, this, buffer);
+        appendFields(locator, buffer, strategy);
+        strategy.appendEnd(locator, this, buffer);
+        return buffer;
+    }
+
+    public StringBuilder appendFields(ObjectLocator locator, StringBuilder buffer, ToStringStrategy strategy) {
+        {
+            WsCoordinate theCord;
+            theCord = this.getCord();
+            strategy.appendField(locator, this, "cord", buffer, theCord);
+        }
+        {
+            CommonResp theResult;
+            theResult = this.getResult();
+            strategy.appendField(locator, this, "result", buffer, theResult);
+        }
+        return buffer;
+    }
+
+    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy strategy) {
+        if (!(object instanceof GetSpaceShuttleExitPosResponse)) {
+            return false;
+        }
+        if (this == object) {
+            return true;
+        }
+        final GetSpaceShuttleExitPosResponse that = ((GetSpaceShuttleExitPosResponse) object);
+        {
+            WsCoordinate lhsCord;
+            lhsCord = this.getCord();
+            WsCoordinate rhsCord;
+            rhsCord = that.getCord();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "cord", lhsCord), LocatorUtils.property(thatLocator, "cord", rhsCord), lhsCord, rhsCord)) {
+                return false;
+            }
+        }
+        {
+            CommonResp lhsResult;
+            lhsResult = this.getResult();
+            CommonResp rhsResult;
+            rhsResult = that.getResult();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "result", lhsResult), LocatorUtils.property(thatLocator, "result", rhsResult), lhsResult, rhsResult)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean equals(Object object) {
+        final EqualsStrategy strategy = JAXBEqualsStrategy.INSTANCE;
+        return equals(null, null, object, strategy);
+    }
+
+    public int hashCode(ObjectLocator locator, HashCodeStrategy strategy) {
+        int currentHashCode = 1;
+        {
+            WsCoordinate theCord;
+            theCord = this.getCord();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "cord", theCord), currentHashCode, theCord);
+        }
+        {
+            CommonResp theResult;
+            theResult = this.getResult();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "result", theResult), currentHashCode, theResult);
+        }
+        return currentHashCode;
+    }
+
+    public int hashCode() {
+        final HashCodeStrategy strategy = JAXBHashCodeStrategy.INSTANCE;
+        return this.hashCode(null, strategy);
     }
 
 }

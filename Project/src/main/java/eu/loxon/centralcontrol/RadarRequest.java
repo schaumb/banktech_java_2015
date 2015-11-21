@@ -8,6 +8,17 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import org.jvnet.jaxb2_commons.lang.Equals;
+import org.jvnet.jaxb2_commons.lang.EqualsStrategy;
+import org.jvnet.jaxb2_commons.lang.HashCode;
+import org.jvnet.jaxb2_commons.lang.HashCodeStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBHashCodeStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBToStringStrategy;
+import org.jvnet.jaxb2_commons.lang.ToString;
+import org.jvnet.jaxb2_commons.lang.ToStringStrategy;
+import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
 
 
 /**
@@ -36,11 +47,29 @@ import javax.xml.bind.annotation.XmlType;
     "cord"
 })
 @XmlRootElement(name = "radarRequest")
-public class RadarRequest {
+public class RadarRequest implements Equals, HashCode, ToString
+{
 
     protected int unit;
     @XmlElement(required = true)
     protected List<WsCoordinate> cord;
+
+    /**
+     * Default no-arg constructor
+     * 
+     */
+    public RadarRequest() {
+        super();
+    }
+
+    /**
+     * Fully-initialising value constructor
+     * 
+     */
+    public RadarRequest(final int unit, final List<WsCoordinate> cord) {
+        this.unit = unit;
+        this.cord = cord;
+    }
 
     /**
      * Gets the value of the unit property.
@@ -85,6 +114,88 @@ public class RadarRequest {
             cord = new ArrayList<WsCoordinate>();
         }
         return this.cord;
+    }
+
+    public String toString() {
+        final ToStringStrategy strategy = JAXBToStringStrategy.INSTANCE;
+        final StringBuilder buffer = new StringBuilder();
+        append(null, buffer, strategy);
+        return buffer.toString();
+    }
+
+    public StringBuilder append(ObjectLocator locator, StringBuilder buffer, ToStringStrategy strategy) {
+        strategy.appendStart(locator, this, buffer);
+        appendFields(locator, buffer, strategy);
+        strategy.appendEnd(locator, this, buffer);
+        return buffer;
+    }
+
+    public StringBuilder appendFields(ObjectLocator locator, StringBuilder buffer, ToStringStrategy strategy) {
+        {
+            int theUnit;
+            theUnit = this.getUnit();
+            strategy.appendField(locator, this, "unit", buffer, theUnit);
+        }
+        {
+            List<WsCoordinate> theCord;
+            theCord = (((this.cord!= null)&&(!this.cord.isEmpty()))?this.getCord():null);
+            strategy.appendField(locator, this, "cord", buffer, theCord);
+        }
+        return buffer;
+    }
+
+    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy strategy) {
+        if (!(object instanceof RadarRequest)) {
+            return false;
+        }
+        if (this == object) {
+            return true;
+        }
+        final RadarRequest that = ((RadarRequest) object);
+        {
+            int lhsUnit;
+            lhsUnit = this.getUnit();
+            int rhsUnit;
+            rhsUnit = that.getUnit();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "unit", lhsUnit), LocatorUtils.property(thatLocator, "unit", rhsUnit), lhsUnit, rhsUnit)) {
+                return false;
+            }
+        }
+        {
+            List<WsCoordinate> lhsCord;
+            lhsCord = (((this.cord!= null)&&(!this.cord.isEmpty()))?this.getCord():null);
+            List<WsCoordinate> rhsCord;
+            rhsCord = (((that.cord!= null)&&(!that.cord.isEmpty()))?that.getCord():null);
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "cord", lhsCord), LocatorUtils.property(thatLocator, "cord", rhsCord), lhsCord, rhsCord)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean equals(Object object) {
+        final EqualsStrategy strategy = JAXBEqualsStrategy.INSTANCE;
+        return equals(null, null, object, strategy);
+    }
+
+    public int hashCode(ObjectLocator locator, HashCodeStrategy strategy) {
+        int currentHashCode = 1;
+        {
+            int theUnit;
+            theUnit = this.getUnit();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "unit", theUnit), currentHashCode, theUnit);
+        }
+        {
+            List<WsCoordinate> theCord;
+            theCord = (((this.cord!= null)&&(!this.cord.isEmpty()))?this.getCord():null);
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "cord", theCord), currentHashCode, theCord);
+        }
+        return currentHashCode;
+    }
+
+    public int hashCode() {
+        final HashCodeStrategy strategy = JAXBHashCodeStrategy.INSTANCE;
+        return this.hashCode(null, strategy);
     }
 
 }

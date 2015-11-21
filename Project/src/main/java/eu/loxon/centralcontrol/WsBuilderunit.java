@@ -5,6 +5,17 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import org.jvnet.jaxb2_commons.lang.Equals;
+import org.jvnet.jaxb2_commons.lang.EqualsStrategy;
+import org.jvnet.jaxb2_commons.lang.HashCode;
+import org.jvnet.jaxb2_commons.lang.HashCodeStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBEqualsStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBHashCodeStrategy;
+import org.jvnet.jaxb2_commons.lang.JAXBToStringStrategy;
+import org.jvnet.jaxb2_commons.lang.ToString;
+import org.jvnet.jaxb2_commons.lang.ToStringStrategy;
+import org.jvnet.jaxb2_commons.locator.ObjectLocator;
+import org.jvnet.jaxb2_commons.locator.util.LocatorUtils;
 
 
 /**
@@ -32,11 +43,29 @@ import javax.xml.bind.annotation.XmlType;
     "cord",
     "unitid"
 })
-public class WsBuilderunit {
+public class WsBuilderunit implements Equals, HashCode, ToString
+{
 
     @XmlElement(required = true)
     protected WsCoordinate cord;
     protected int unitid;
+
+    /**
+     * Default no-arg constructor
+     * 
+     */
+    public WsBuilderunit() {
+        super();
+    }
+
+    /**
+     * Fully-initialising value constructor
+     * 
+     */
+    public WsBuilderunit(final WsCoordinate cord, final int unitid) {
+        this.cord = cord;
+        this.unitid = unitid;
+    }
 
     /**
      * Gets the value of the cord property.
@@ -76,6 +105,88 @@ public class WsBuilderunit {
      */
     public void setUnitid(int value) {
         this.unitid = value;
+    }
+
+    public String toString() {
+        final ToStringStrategy strategy = JAXBToStringStrategy.INSTANCE;
+        final StringBuilder buffer = new StringBuilder();
+        append(null, buffer, strategy);
+        return buffer.toString();
+    }
+
+    public StringBuilder append(ObjectLocator locator, StringBuilder buffer, ToStringStrategy strategy) {
+        strategy.appendStart(locator, this, buffer);
+        appendFields(locator, buffer, strategy);
+        strategy.appendEnd(locator, this, buffer);
+        return buffer;
+    }
+
+    public StringBuilder appendFields(ObjectLocator locator, StringBuilder buffer, ToStringStrategy strategy) {
+        {
+            WsCoordinate theCord;
+            theCord = this.getCord();
+            strategy.appendField(locator, this, "cord", buffer, theCord);
+        }
+        {
+            int theUnitid;
+            theUnitid = this.getUnitid();
+            strategy.appendField(locator, this, "unitid", buffer, theUnitid);
+        }
+        return buffer;
+    }
+
+    public boolean equals(ObjectLocator thisLocator, ObjectLocator thatLocator, Object object, EqualsStrategy strategy) {
+        if (!(object instanceof WsBuilderunit)) {
+            return false;
+        }
+        if (this == object) {
+            return true;
+        }
+        final WsBuilderunit that = ((WsBuilderunit) object);
+        {
+            WsCoordinate lhsCord;
+            lhsCord = this.getCord();
+            WsCoordinate rhsCord;
+            rhsCord = that.getCord();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "cord", lhsCord), LocatorUtils.property(thatLocator, "cord", rhsCord), lhsCord, rhsCord)) {
+                return false;
+            }
+        }
+        {
+            int lhsUnitid;
+            lhsUnitid = this.getUnitid();
+            int rhsUnitid;
+            rhsUnitid = that.getUnitid();
+            if (!strategy.equals(LocatorUtils.property(thisLocator, "unitid", lhsUnitid), LocatorUtils.property(thatLocator, "unitid", rhsUnitid), lhsUnitid, rhsUnitid)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean equals(Object object) {
+        final EqualsStrategy strategy = JAXBEqualsStrategy.INSTANCE;
+        return equals(null, null, object, strategy);
+    }
+
+    public int hashCode(ObjectLocator locator, HashCodeStrategy strategy) {
+        int currentHashCode = 1;
+        {
+            WsCoordinate theCord;
+            theCord = this.getCord();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "cord", theCord), currentHashCode, theCord);
+        }
+        {
+            int theUnitid;
+            theUnitid = this.getUnitid();
+            currentHashCode = strategy.hashCode(LocatorUtils.property(locator, "unitid", theUnitid), currentHashCode, theUnitid);
+        }
+        return currentHashCode;
+    }
+
+    public int hashCode() {
+        final HashCodeStrategy strategy = JAXBHashCodeStrategy.INSTANCE;
+        return this.hashCode(null, strategy);
     }
 
 }

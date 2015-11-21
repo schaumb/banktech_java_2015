@@ -11,7 +11,7 @@
 4. Menjetek a repo-ban lévő Project mappába és futtassatok egy 'mvn clean package'-t. Ha success, akkor minden jó, ha nem, szóljatok. A target mappába ment a jar.
 
 
-# IDEA integráció:
+# IDEA integráció
 
 5. Telepítsétek az IDEA-t: https://www.jetbrains.com/idea/download/
 
@@ -24,10 +24,6 @@
 
 9. Innen már fodíthattok és futtathattok is command line-ból. De egyszerűbb beállítani egy run configuration-t IDEA-ban: 'Run / Edit configurations... / + / Application'. Itt válasszátok ki a main class-t, az argumentum legyen 'http://javachallenge.loxon.hu:8443/engine/CentralControl?wsdl utinni QKNJ4138 -Xmx=256m' és alul a 'Before launch'-nál adjatok hozzá egy 'clean package' maven goal-t.
 
+# Git integrálása IDEA-ba
 
-# Bean generálás:
-
-Ha újra kéne generálni a beaneket (mondjuk változik valami a szerveren), akkor így:
-zsmester@zsmester-ThinkPad:~/Dropbox/Dev/Java/BankTech/Repo/Project/src/main/java$ wsimport -keep -verbose -Xauthfile ../../../auth http://javachallenge.loxon.hu:8443/engine/CentralControl?wsdl
-
-Légyszi a beanekbe ne írjatok bele!
+IDEA Toolbar / VCS / Git
