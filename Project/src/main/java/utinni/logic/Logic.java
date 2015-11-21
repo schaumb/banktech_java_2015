@@ -1,133 +1,289 @@
+
 package utinni.logic;
 
 import eu.loxon.centralcontrol.*;
 
+import java.util.List;
+import java.util.Set;
+
 public class Logic {
 
+    private Map map = new Map();
     private CentralControl centralControl;
+    private ActionCostResponse actionCostResponse;
 
     public Logic(CentralControl centralControl) {
         this.centralControl = centralControl;
     }
 
     public void run() {
-        // TODO make the application logic here
+
+        // First get the static informations
         StartGameResponse startGameResponse = centralControl.startGame(new StartGameRequest());
-        /*System.out.println(startGameResponse.getSize().getX());
-        System.out.println(startGameResponse.getSize().getY());
-        System.out.println(startGameResponse.getResult().getScore().getTotal());
-        System.out.println(startGameResponse.getResult().getBuilderUnit());
+        map.addInfo(startGameResponse);
+
+        System.out.println("Units size: " + startGameResponse.getUnits().size());
+
         GetSpaceShuttlePosResponse getSpaceShuttlePosResponse =
                 centralControl.getSpaceShuttlePos(new GetSpaceShuttlePosRequest());
-        System.out.println(getSpaceShuttlePosResponse.getCord().getX());
-        System.out.println(getSpaceShuttlePosResponse.getCord().getY());
-        GetSpaceShuttleExitPosResponse getSpaceShuttleExitPosResponse = centralControl.getSpaceShuttleExitPos(new GetSpaceShuttleExitPosRequest());
-        System.out.println(getSpaceShuttleExitPosResponse.getCord().getX());
-        System.out.println(getSpaceShuttleExitPosResponse.getCord().getY());*/
-        System.out.println(startGameResponse.getUnits().size());
-        for (WsBuilderunit builderUnit : startGameResponse.getUnits()) {
-            System.out.println("unit id at start: " + builderUnit.getUnitid());
+
+        map.addInfo(getSpaceShuttlePosResponse);
+
+        GetSpaceShuttleExitPosResponse getSpaceShuttleExitPosResponse =
+                centralControl.getSpaceShuttleExitPos(new GetSpaceShuttleExitPosRequest());
+
+        map.addInfo(getSpaceShuttleExitPosResponse);
+
+        actionCostResponse = centralControl.getActionCost(new ActionCostRequest());
+
+        map.addInfo(actionCostResponse);
+
+
+        // beginning strategy
+        if(map.isReallyFirstTick()) {
+            System.out.println("First tick!");
         }
-        /*for (int i = 0; i < 100; ++i) {
-            int actionCostResponse = centralControl.getActionCost(new ActionCostRequest()).getResult().getBuilderUnit();
-            System.out.println(actionCostResponse);
-            try {
-                Thread.sleep(500L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }*/
-
-
-        int starUnit = 0;//centralControl.isMyTurn(new IsMyTurnRequest()).getResult().getBuilderUnit();
-        int j = 0;
-        for (int i = 0; i < 10000; i++) {
-            try {
-                Thread.sleep(301L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            IsMyTurnResponse isMyTurnResponse = centralControl.isMyTurn(new IsMyTurnRequest());
-            if (!isMyTurnResponse.isIsYourTurn() || isMyTurnResponse.getResult().getBuilderUnit() != starUnit || isMyTurnResponse.getResult().getActionPointsLeft() <= 4) {
-                continue;
-            }
-            StructureTunnelRequest structureTunnelRequest = new StructureTunnelRequest();
-            structureTunnelRequest.setUnit(starUnit);
-            structureTunnelRequest.setDirection(j % 2 == 0 ? WsDirection.RIGHT : WsDirection.DOWN);
-            StructureTunnelResponse structureTunnelResponse = centralControl.structureTunnel(structureTunnelRequest);
-            System.out.println("structureTunnel: " + structureTunnelResponse.getResult().getType());
-            System.out.println("structureTunnel: " + structureTunnelResponse.getResult().getMessage());
-            System.out.println("getReward: " + structureTunnelResponse.getResult().getScore().getReward());
-            System.out.println("getBonus: " + structureTunnelResponse.getResult().getScore().getBonus());
-            System.out.println("getPenalty: " + structureTunnelResponse.getResult().getScore().getPenalty());
-            System.out.println("getTotal: " + structureTunnelResponse.getResult().getScore().getTotal());
-
-            MoveBuilderUnitRequest moveBuilderUnitRequest = new MoveBuilderUnitRequest();
-            moveBuilderUnitRequest.setUnit(starUnit);
-            moveBuilderUnitRequest.setDirection(j % 2 == 0 ? WsDirection.RIGHT : WsDirection.DOWN);
-            MoveBuilderUnitResponse moveBuilderUnitResponse = centralControl.moveBuilderUnit(moveBuilderUnitRequest);
-            System.out.println("move: " + moveBuilderUnitResponse.getResult().getType());
-            System.out.println("move: " + moveBuilderUnitResponse.getResult().getMessage());
-            System.out.println("getActionPointsLeft: " + moveBuilderUnitResponse.getResult().getActionPointsLeft());
-            System.out.println("getBuilderUnit: " + moveBuilderUnitResponse.getResult().getBuilderUnit());
-
-            WatchRequest watchRequest = new WatchRequest();
-            watchRequest.setUnit(starUnit);
-            WatchResponse watchResponse = centralControl.watch(watchRequest);
-            System.out.println("watchResponse: " + watchResponse.getResult().getType());
-            System.out.println("watchResponse: " + watchResponse.getResult().getMessage());
-            for (Scouting scouting : watchResponse.getScout()) {
-                System.out.println("scouting.getCord().getX(): " + scouting.getCord().getX());
-                System.out.println("scouting.getCord().getY(): " + scouting.getCord().getY());
-                System.out.println("scouting.getTeam(): " + scouting.getTeam());
-                System.out.println("scouting.getObject(): " + scouting.getObject());
-            }
-
-            System.out.println();
-
-            ++j;
+        else {
+            System.out.println("Not in the starting position. It's just a continue ~ some bad things can happen");
         }
 
-        /*for (int i = 0; i < 100; ++i) {
-            IsMyTurnResponse isMyTurnResponse = centralControl.isMyTurn(new IsMyTurnRequest());
-            System.out.println("isIsYourTurn(): " + isMyTurnResponse.isIsYourTurn());
-            System.out.println("getBuilderUnit(): " + isMyTurnResponse.getResult().getBuilderUnit());
-            System.out.println("getActionPointsLeft(): " + isMyTurnResponse.getResult().getActionPointsLeft());
-            System.out.println("getTotal(): " + isMyTurnResponse.getResult().getScore().getTotal());
+        while(map.hasUnitOnShuttle()) {
+            System.out.println("Has unit on shuttle - tick " + Map.getTick());
+            Set<Integer> ids = map.getMyUnitIds();
+            while(ids.size() > 0) {
+                map.print();
+                Integer nextUnitId = sleepWhile(ids);
+                ids.remove(nextUnitId);
+                System.out.println("NextUnitId: " + nextUnitId);
 
-            ActionCostResponse actionCostResponse = centralControl.getActionCost(new ActionCostRequest());
-            System.out.println("getDrill(): " + actionCostResponse.getDrill());
-            System.out.println("getExplode(): " + actionCostResponse.getExplode());
-            System.out.println("getAvailableExplosives(): " + actionCostResponse.getAvailableExplosives());
+                watch(nextUnitId);
+                if (map.isUnitOnShuttle(nextUnitId)) {
+                    if (tryExplode(nextUnitId, map.getDirectionFromShuttle())) {
+                        // ...
+                    }
 
-            RadarRequest radarRequest = new RadarRequest();
-            radarRequest.setUnit(isMyTurnResponse.getResult().getBuilderUnit());
-            for (int j = 2; j <= 4; ++j) {
-                for (int k = 15; k <= 17; ++k) {
-                    WsCoordinate wsCoordinate = new WsCoordinate();
-                    wsCoordinate.setX(j);
-                    wsCoordinate.setY(k);
-                    radarRequest.getCord().add(wsCoordinate);
+                    if (tryTunnel(nextUnitId, map.getDirectionFromShuttle())) {
+
+                    } else if (tryStep(nextUnitId, map.getDirectionFromShuttle())) {
+
+                    }
+                }
+                // not else!
+                if (!map.isUnitOnShuttle(nextUnitId)) {
+                    boolean hasSomeCommand = false;
+                    do {
+                        hasSomeCommand = false;
+                        WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
+                        List<WsDirection> movableDir = map.getKnownSteppableDirections(unitCoordinate);
+
+                        for (WsDirection wsDirection : movableDir) {
+                            WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
+                            if (Coordinating.distance(map.spaceShuttleExitPos, unitCoordinate) <
+                                    Coordinating.distance(map.spaceShuttleExitPos, nextCoordinate)) {
+                                if (tryStep(nextUnitId, wsDirection)) {
+                                    hasSomeCommand = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!hasSomeCommand) {
+                            List<WsDirection> tunnelableDir = map.getKnownTunnelableDirections(unitCoordinate);
+
+                            for (WsDirection wsDirection : tunnelableDir) {
+                                WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
+                                if (Coordinating.distance(map.spaceShuttleExitPos, unitCoordinate) <
+                                        Coordinating.distance(map.spaceShuttleExitPos, nextCoordinate)) {
+                                    if (tryTunnel(nextUnitId, wsDirection)) {
+                                        hasSomeCommand = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (!hasSomeCommand) {
+                            List<WsDirection> explodableDir = map.getKnownExplodableDirections(unitCoordinate);
+
+                            for (WsDirection wsDirection : explodableDir) {
+                                WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
+                                if (Coordinating.distance(map.spaceShuttleExitPos, unitCoordinate) <
+                                        Coordinating.distance(map.spaceShuttleExitPos, nextCoordinate)) {
+                                    if (tryExplode(nextUnitId, wsDirection)) {
+                                        hasSomeCommand = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } while (hasSomeCommand);
+                }
+                for (int i = 3; i > 0; --i) {
+                    if (tryRadar(nextUnitId, i)) {
+                        break;
+                    }
                 }
             }
-            RadarResponse radarResponse = centralControl.radar(radarRequest);
-            System.out.println("radarResponse.getCode(): " + radarResponse.getResult().getType());
-            System.out.println("radarResponse.getMessage(): " + radarResponse.getResult().getMessage());
-            for (Scouting scouting : radarResponse.getScout()) {
-                System.out.println("scouting.getCord().getX(): " + scouting.getCord().getX());
-                System.out.println("scouting.getCord().getY(): " + scouting.getCord().getY());
-                System.out.println("scouting.getTeam(): " + scouting.getTeam());
-                System.out.println("scouting.getObject(): " + scouting.getObject());
+            Map.advanceTick();
+
+        }
+
+        map.print();
+
+        // TODO make the application logic here
+
+    }
+
+    public boolean watch(int unitId) {
+
+        List<WsCoordinate> unknownCoordinates = map.getUnknownCoordinates(
+                map.getUnit(unitId).getCoordinate(), 1);
+
+        if(actionCostResponse.getWatch() >
+                unknownCoordinates.size() * actionCostResponse.getRadar()) {
+            return tryRadar(unitId, 1);
+        }
+        else if(map.getLastCommonResponse().getActionPointsLeft() >=
+                actionCostResponse.getWatch()) {
+
+            WatchRequest watchRequest = new WatchRequest();
+            watchRequest.setUnit(unitId);
+
+            WatchResponse watchResponse = centralControl.watch(watchRequest);
+
+            map.addInfo(watchResponse);
+
+            return true;
+        }
+        return false;
+    }
+
+    public boolean tryTunnel(int unitId, WsDirection wsDirection) {
+        Field tryTunnelField = map.getFieldFromUnit(unitId, wsDirection);
+        if(tryTunnelField.isTunnelable()) {
+            // if we have enough energy to tunnel
+            if(map.getLastCommonResponse().getActionPointsLeft() >=
+                    actionCostResponse.getDrill()) {
+
+                StructureTunnelRequest structureTunnelRequest = new StructureTunnelRequest();
+                structureTunnelRequest.setUnit(unitId);
+                structureTunnelRequest.setDirection(wsDirection);
+
+                map.addCache(structureTunnelRequest);
+
+                StructureTunnelResponse structureTunnelResponse
+                        = centralControl.structureTunnel(structureTunnelRequest);
+
+                if(map.acceptCache(structureTunnelResponse.getResult())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean tryStep(int unitId, WsDirection wsDirection) {
+        Field tryTunnelField = map.getFieldFromUnit(unitId, wsDirection);
+        System.out.println("Try to step " + unitId + " to " + wsDirection.value());
+        System.out.println("Is steppable: " + tryTunnelField.getScouting().getObject());
+        System.out.print("From: " + map.getUnit(unitId).getCoordinate());
+        System.out.println(" To: " + Coordinating.getNextCoordinate(map.getUnit(unitId).getCoordinate(), wsDirection));
+        if(tryTunnelField.isSteppable()) {
+            // if we have enough energy to tunnel
+            System.out.println("Action point left: " + map.getLastCommonResponse().getActionPointsLeft()
+             + " need:" + actionCostResponse.getMove());
+            if(map.getLastCommonResponse().getActionPointsLeft() >=
+                    actionCostResponse.getMove()) {
+
+                MoveBuilderUnitRequest moveBuilderUnitRequest = new MoveBuilderUnitRequest();
+                moveBuilderUnitRequest.setUnit(unitId);
+                moveBuilderUnitRequest.setDirection(wsDirection);
+
+                map.addCache(moveBuilderUnitRequest);
+
+                MoveBuilderUnitResponse moveBuilderUnitResponse
+                        = centralControl.moveBuilderUnit(moveBuilderUnitRequest);
+
+
+                if(map.acceptCache(moveBuilderUnitResponse.getResult())) {
+                    System.out.println("ALL OK");
+                    return true;
+                }
+                System.out.println("Stg went wrong");
+            }
+        }
+        return false;
+    }
+
+    public boolean tryExplode(int unitId, WsDirection wsDirection) {
+        Field tryExplodeField = map.getFieldFromUnit(unitId, wsDirection);
+        if(tryExplodeField.isExpodable()) {
+            // if we have enough energy to tunnel
+            if(map.getLastCommonResponse().getActionPointsLeft() >=
+                    actionCostResponse.getExplode() &&
+                    map.getLastCommonResponse().getExplosivesLeft() > 0) {
+
+                ExplodeCellRequest explodeCellRequest = new ExplodeCellRequest();
+                explodeCellRequest.setUnit(unitId);
+                explodeCellRequest.setDirection(wsDirection);
+
+                map.addCache(explodeCellRequest);
+
+                ExplodeCellResponse explodeCellResponse
+                        = centralControl.explodeCell(explodeCellRequest);
+
+                if(map.acceptCache(explodeCellResponse.getResult())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean tryRadar(int unitId, int radius) {
+        // if we have enough energy to radar some cells
+        List<WsCoordinate> unknownCoordinates = map.getUnknownCoordinates(
+                map.getUnit(unitId).getCoordinate(), radius);
+
+        if(map.getLastCommonResponse().getActionPointsLeft() >=
+                        unknownCoordinates.size() * actionCostResponse.getRadar()) {
+
+            if(unknownCoordinates.size() == 0) {
+                return true;
             }
 
-            System.out.println();
+            RadarRequest radarRequest = new RadarRequest();
+            radarRequest.setUnit(unitId);
+            for(WsCoordinate wsCoordinate : unknownCoordinates) {
+                radarRequest.getCord().add(wsCoordinate);
+            }
+
+            RadarResponse radarResponse = centralControl.radar(radarRequest);
+
+            map.addInfo(radarResponse);
+
+            return true;
+        }
+        return false;
+    }
+
+    private int lastUnitIdWas = -1;
+    public int sleepWhile(Set<Integer> validUnitIds) {
+        while(true) {
+            IsMyTurnResponse isMyTurnResponse = centralControl.isMyTurn(new IsMyTurnRequest());
+            if (isMyTurnResponse.isIsYourTurn() &&
+                    validUnitIds.contains(isMyTurnResponse.getResult().getBuilderUnit()) &&
+                    lastUnitIdWas != isMyTurnResponse.getResult().getBuilderUnit()) {
+
+                map.addInfo(isMyTurnResponse);
+
+                return lastUnitIdWas = isMyTurnResponse.getResult().getBuilderUnit();
+            }
 
             try {
                 Thread.sleep(301L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }*/
+        }
     }
 }
