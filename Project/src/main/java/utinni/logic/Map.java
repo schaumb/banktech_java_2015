@@ -31,8 +31,6 @@ public class Map {
         runAfterNOk = null;
         runAfterOk = null;
 
-        System.out.println(commonResp);
-
         setLastCommonResponse(commonResp);
 
         return commonResp.getType() == ResultType.DONE;
@@ -99,8 +97,11 @@ public class Map {
                 getUnit(structureTunnelRequest.getUnit()).getCoordinate(),
                 structureTunnelRequest.getDirection());
 
-        runAfterOk = () -> knownCoordinates.put(nextField,
-                new Field(nextField, ObjectType.TUNNEL, App.user, getTick()));
+        runAfterOk = () -> {
+            knownCoordinates.put(nextField,
+                    new Field(nextField, ObjectType.TUNNEL, App.user, getTick()));
+            getLastCommonResponse().getScore().setReward(getLastCommonResponse().getScore().getReward() + 100);
+        };
         runAfterNOk = () -> knownCoordinates.remove(nextField);
     }
 
@@ -247,6 +248,7 @@ public class Map {
     }
 
     void print(PrintStream out) {
+        out.println(StrategyObserver.get());
         for(int y = mapSize.getY() - 1; y >= 0; --y) {
             for(int x = 0; x < mapSize.getX(); ++x) {
                 Field field = getField(x, y);
@@ -288,6 +290,21 @@ public class Map {
     }
 
     public void setLastCommonResponse(CommonResp lastCommonResponse) {
+        System.out.println(lastCommonResponse);
+
+        if(getLastCommonResponse() != null &&
+                lastCommonResponse.getScore().getBonus() < this.lastCommonResponse.getScore().getBonus()) {
+            StrategyObserver.get().lostBonusTurnLeft = lastCommonResponse.getTurnsLeft();
+        }
+
+        if(getLastCommonResponse() != null &&
+            lastCommonResponse.getScore().getReward() < this.lastCommonResponse.getScore().getReward()) {
+            long count = (this.lastCommonResponse.getScore().getReward() - lastCommonResponse.getScore().getReward()) / 100;
+            StrategyObserver.get().tunnelLost += (int)count;
+
+            System.out.println("Lost another " + count + " tunnel.");
+        }
+
         if(getLastCommonResponse() != null &&
                 lastCommonResponse.getActionPointsLeft() > getLastCommonResponse().getActionPointsLeft()) {
             this.lastCommonResponse = lastCommonResponse;
@@ -297,11 +314,6 @@ public class Map {
         if(lastCommonResponse.getType() != ResultType.DONE) {
             this.lastCommonResponse = lastCommonResponse;
             throw new GameRuntimeException("Not valid command");
-        }
-
-        if(lastCommonResponse.getTurnsLeft() == 0) {
-            this.lastCommonResponse = lastCommonResponse;
-            throw new GameRuntimeException("EndGame");
         }
 
         this.lastCommonResponse = lastCommonResponse;
@@ -316,7 +328,7 @@ public class Map {
                 .collect(Collectors.toList());
     }
 
-    public List<Commands> getAllShortKnowDestinaion(int unitId) {
+    public List<Commands> getAllShortKnowDestination(int unitId) {
         HashSet<WsCoordinate> coordinates = new HashSet<>();
 
         List<Commands> result = new ArrayList<>();
@@ -327,11 +339,11 @@ public class Map {
         while(queue.size() > 0) {
             Commands now = queue.remove();
 
-            if(coordinates.contains(now.getLastCoordinate())) {
+            if(coordinates.contains(now.getLastAffectingCoordinate())) {
                 continue;
             }
 
-            coordinates.add(now.getLastCoordinate());
+            coordinates.add(now.getLastAffectingCoordinate());
 
             if(!now.lastCommandIsNotMove()) {
                 getNextCommands(now).stream()
@@ -343,6 +355,11 @@ public class Map {
                         });
             }
             else {
+                if(now.getLastType() == Command.Type.Explode) {
+                    Command c = new Command(now.getLastStandingCoordinate(), now.getLastDirection());
+                    c.setCommandType(Command.Type.Tunnel);
+                    now.addCommand(c);
+                }
                 result.add(now);
             }
         }

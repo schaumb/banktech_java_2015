@@ -5,15 +5,13 @@ import eu.loxon.centralcontrol.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Logic {
 
     private Map map = new Map();
     private CentralControl centralControl;
-    private ActionCostResponse actionCostResponse;
+    public static ActionCostResponse actionCostResponse;
 
     public Logic(CentralControl centralControl) {
         this.centralControl = centralControl;
@@ -132,11 +130,12 @@ public class Logic {
             }
             catch (GameRuntimeException e) {
                 System.out.println(e.getMessage());
-
+                /*
                 if(map.getLastCommonResponse().getTurnsLeft() == 0) {
                     //run();
                     return;
                 }
+                */
             }
         }
 
@@ -144,7 +143,6 @@ public class Logic {
         System.out.println("Real logic starts here " + map.getTick());
 
         while(true) {
-            // now is some dummy moving
 
             System.out.println("Tick left " + map.getTick());
             map.print();
@@ -157,9 +155,12 @@ public class Logic {
 
                 while(otherCommand) {
                     watch(nextUnitId);
+                    map.print();
 
-                    WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
-                    List<Commands> possibleCommands = map.getAllShortKnowDestinaion(nextUnitId).stream()
+                    BuilderUnitWrapper.targets.remove(nextUnitId);
+
+                    List<Commands> possibleCommands = map.getAllShortKnowDestination(nextUnitId).stream()
+                            .filter((Commands c1) -> !BuilderUnitWrapper.targets.containsValue(c1.getLastAffectingCoordinate()))
                             .sorted((Commands c1, Commands c2) -> {
                                 int points = map.getLastCommonResponse().getActionPointsLeft();
 
@@ -187,8 +188,8 @@ public class Logic {
                                 }
 
                                 if (result == 0) {
-                                    result = Coordinating.distance(c1.getLastCoordinate(), map.spaceShuttlePos).compareTo(
-                                            Coordinating.distance(c2.getLastCoordinate(), map.spaceShuttlePos));
+                                    result = Coordinating.distance(c1.getLastAffectingCoordinate(), map.spaceShuttlePos).compareTo(
+                                            Coordinating.distance(c2.getLastAffectingCoordinate(), map.spaceShuttlePos));
                                 }
 
                                 if (result == 0) {
@@ -212,9 +213,13 @@ public class Logic {
 
                     System.out.println();
 
+                    BuilderUnitWrapper.targets.put(nextUnitId, possibleCommands.get(0).getLastAffectingCoordinate());
+
                     for (Command command : possibleCommands.get(0).getCommands()) {
                         if (!tryDo(nextUnitId, command)) {
-                            otherCommand = false;
+                            if(command.getCommandType().getCost() > map.getLastCommonResponse().getActionPointsLeft()) {
+                                otherCommand = false;
+                            }
                             break;
                         }
                     }
@@ -247,6 +252,7 @@ public class Logic {
             System.out.println(watchResponse);
 
             map.addInfo(watchResponse);
+            ++StrategyObserver.get().watchCount;
 
             return true;
         }
@@ -284,6 +290,8 @@ public class Logic {
                         = centralControl.structureTunnel(structureTunnelRequest);
 
                 if(map.acceptCache(structureTunnelResponse.getResult())) {
+                    ++StrategyObserver.get().tunnelMake;
+
                     return true;
                 }
             }
@@ -310,6 +318,7 @@ public class Logic {
 
                 if(map.acceptCache(moveBuilderUnitResponse.getResult())) {
                     watch(unitId);
+                    ++StrategyObserver.get().move;
                     return true;
                 }
             }
@@ -335,6 +344,7 @@ public class Logic {
                         = centralControl.explodeCell(explodeCellRequest);
 
                 if(map.acceptCache(explodeCellResponse.getResult())) {
+                    ++StrategyObserver.get().explode;
                     return true;
                 }
             }
@@ -391,6 +401,9 @@ public class Logic {
 
             map.addInfo(radarResponse);
 
+            ++StrategyObserver.get().radarCount;
+            StrategyObserver.get().radarField += coordinates.size();
+
             return true;
         }
         return false;
@@ -413,19 +426,18 @@ public class Logic {
                 try {
                     map.addInfo(isMyTurnResponse);
                 } catch (GameRuntimeException e) {
-                    if(map.getLastCommonResponse().getTurnsLeft() == 0) {
-                        System.exit(0);
-                        // OR
-                        // run();
-                        // return;
-                    }
                     // THAT's OK, what we expect
                 }
 
-
+                if(map.getLastCommonResponse().getTurnsLeft() == 0) {
+                    System.exit(0);
+                    // OR
+                    // run();
+                    // return;
+                }
+                ++StrategyObserver.get().canMove;
                 return lastUnitIdWas = isMyTurnResponse.getResult().getBuilderUnit();
             }
-
         }
     }
 }

@@ -26,7 +26,7 @@ public class Commands implements Cloneable {
     }
 
     public void addCommand(Command command) {
-        assert(getLastCoordinate().equals(command.fieldFrom)) ;
+        assert(getLastStandingCoordinate().equals(command.fieldFrom));
         commands.add(command);
     }
 
@@ -54,16 +54,28 @@ public class Commands implements Cloneable {
         return commands.get(0);
     }
 
-    public WsCoordinate getLastCoordinate() {
+    public WsCoordinate getLastAffectingCoordinate() {
         if(commands.size() == 0) {
             return from;
         }
         return commands.get(commands.size() - 1).getAffectCoordinate();
     }
 
+    public WsCoordinate getLastStandingCoordinate() {
+        if(commands.size() == 0) {
+            return from;
+        }
+        if(commands.get(commands.size() - 1).getCommandType() == Command.Type.Move) {
+            return commands.get(commands.size() - 1).getAffectCoordinate();
+        }
+        else {
+            return commands.get(commands.size() - 1).fieldFrom;
+        }
+    }
+
     public List<Command> getNextStep() {
         List<Command> result =  new ArrayList<>();
-        WsCoordinate from = getLastCoordinate();
+        WsCoordinate from = getLastStandingCoordinate();
         for(WsDirection wsDirection : WsDirection.values()) {
             result.add(new Command(from, wsDirection));
         }
@@ -76,6 +88,13 @@ public class Commands implements Cloneable {
             return null;
         }
         return commands.get(commands.size() - 1).getCommandType();
+    }
+
+    public WsDirection getLastDirection() {
+        if(commands.size() == 0) {
+            return null;
+        }
+        return commands.get(commands.size() - 1).getDirection();
     }
 
     public boolean lastCommandIsNotMove() {

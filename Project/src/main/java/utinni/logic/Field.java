@@ -3,6 +3,8 @@ package utinni.logic;
 import eu.loxon.centralcontrol.*;
 import utinni.App;
 
+import java.util.HashMap;
+
 public class Field {
     private Scouting scouting;
     private int when;
@@ -100,5 +102,7 @@ class BuilderUnitWrapper extends Field {
         }
         return unitId;
     }
+
+    public static HashMap<Integer, WsCoordinate> targets = new HashMap<>();
 }
 
