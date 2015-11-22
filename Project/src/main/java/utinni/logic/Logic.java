@@ -182,7 +182,7 @@ public class Logic {
 
                                 if (result == 0) {
                                     if (c1.getLastType() != c2.getLastType()) {
-                                        result = c1.getLastType() == Command.Type.Tunnel
+                                        result = c1.getLastType() == Command.Type.Explode
                                                 || c2.getLastType() == Command.Type.Xplore ? -1 : 1;
                                     }
                                 }

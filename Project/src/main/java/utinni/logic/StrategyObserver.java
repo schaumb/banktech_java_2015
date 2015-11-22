@@ -40,6 +40,7 @@ public class StrategyObserver {
                 + "Radar: " + radarCount + "\n"
                 + "Radared fields: " + radarField + "\n"
                 + "Watch: " + watchCount + "\n"
-                + "When lost bonus: " + lostBonusTurnLeft + "\n";
+                + "When lost bonus: " + lostBonusTurnLeft + "\n"
+                + "Bad requests: " + badRequest + "\n";
     }
 }

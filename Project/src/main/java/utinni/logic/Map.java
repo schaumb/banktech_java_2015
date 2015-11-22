@@ -26,6 +26,7 @@ public class Map {
                 runAfterOk.run();
             }
         } else if (runAfterNOk != null) {
+            ++StrategyObserver.get().badRequest;
             runAfterNOk.run();
         }
         runAfterNOk = null;
@@ -355,7 +356,8 @@ public class Map {
                         });
             }
             else {
-                if(now.getLastType() == Command.Type.Explode) {
+                if(now.getLastType() == Command.Type.Explode &&
+                        getField(now.getLastAffectingCoordinate()).isGranite()) {
                     Command c = new Command(now.getLastStandingCoordinate(), now.getLastDirection());
                     c.setCommandType(Command.Type.Tunnel);
                     now.addCommand(c);
