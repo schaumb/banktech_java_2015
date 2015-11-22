@@ -20,8 +20,6 @@ public class Map {
     Runnable runAfterNOk;
 
     public boolean acceptCache(CommonResp commonResp) {
-        setLastCommonResponse(commonResp);
-        System.out.println(commonResp);
 
         if (commonResp.getType() == ResultType.DONE) {
             if (runAfterOk != null) {
@@ -33,14 +31,16 @@ public class Map {
         runAfterNOk = null;
         runAfterOk = null;
 
-        if(commonResp.getType() != ResultType.DONE) {
-            throw new GameRuntimeException("Not valid command");
-        }
+        System.out.println(commonResp);
+
+        setLastCommonResponse(commonResp);
 
         return commonResp.getType() == ResultType.DONE;
     }
 
     public void addInfo(StartGameResponse startGameResponse) {
+        setLastCommonResponse(startGameResponse.getResult());
+
         mapSize = startGameResponse.getSize();
         mapSize.setX(mapSize.getX() + 1);
         mapSize.setY(mapSize.getY() + 1);
@@ -55,7 +55,6 @@ public class Map {
             System.out.println("My unit (id: " + wsBuilderunit.getUnitid() + ") in coord: "
                 + wsBuilderunit.getCord());
         }
-        setLastCommonResponse(startGameResponse.getResult());
     }
 
     public void addInfo(RadarResponse radarResponse) {
@@ -223,6 +222,8 @@ public class Map {
         }
         return Coordinating.getCoordinatesToRadius(from, maxDistance).stream()
                 .filter((WsCoordinate wsCoordinate) -> !knownCoordinates.containsKey(wsCoordinate))
+                .filter((WsCoordinate wsCoordinate) -> 0 <= wsCoordinate.getX() && wsCoordinate.getX() < mapSize.getX()
+                                                    && 0 <= wsCoordinate.getY() && wsCoordinate.getY() < mapSize.getY())
                 .collect(Collectors.toList());
     }
 
@@ -247,8 +248,8 @@ public class Map {
     }
 
     void print(PrintStream out) {
-        for(int x = 0; x < mapSize.getX(); ++x) {
-            for(int y = 0; y < mapSize.getY(); ++y) {
+        for(int y = mapSize.getY() - 1; y >= 0; --y) {
+            for(int x = 0; x < mapSize.getX(); ++x) {
                 Field field = getField(x, y);
 
                 if(field != null) {
@@ -259,6 +260,9 @@ public class Map {
                                 break;
                             }
                         }
+                    }
+                    else if(field.isSteppable()) {
+                        out.print(' ');
                     }
                     else {
                         out.print(field.getScouting().getObject().value().charAt(0));
@@ -272,13 +276,8 @@ public class Map {
         }
     }
 
-    private static int tick;
-    public static int getTick() {
-        return tick;
-    }
-
-    public static void advanceTick() {
-        ++tick;
+    public int getTick() {
+        return getLastCommonResponse().getTurnsLeft();
     }
 
     public void addInfo(IsMyTurnResponse isMyTurnResponse) {
@@ -295,6 +294,17 @@ public class Map {
             this.lastCommonResponse = lastCommonResponse;
             throw new GameRuntimeException("Action point is bigger");
         }
+
+        if(lastCommonResponse.getType() != ResultType.DONE) {
+            this.lastCommonResponse = lastCommonResponse;
+            throw new GameRuntimeException("Not valid command");
+        }
+
+        if(lastCommonResponse.getTurnsLeft() == 0) {
+            this.lastCommonResponse = lastCommonResponse;
+            throw new GameRuntimeException("EndGame");
+        }
+
         this.lastCommonResponse = lastCommonResponse;
     }
 }

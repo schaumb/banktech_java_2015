@@ -49,135 +49,42 @@ public class Logic {
         }
 
         while(map.hasUnitOnShuttle()) {
-            System.out.println("Has unit on shuttle - tick " + Map.getTick());
-            Set<Integer> ids = map.getMyUnitIds();
-            while(ids.size() > 0) {
-                map.print();
-                Integer nextUnitId = sleepWhile(ids);
-                ids.remove(nextUnitId);
-                System.out.println("NextUnitId: " + nextUnitId);
-                try {
-
-                    watch(nextUnitId);
-                    if (map.isUnitOnShuttle(nextUnitId)) {
-                        if (tryExplode(nextUnitId, map.getDirectionFromShuttle())) {
-                            // ...
-                        }
-
-                        if (tryTunnel(nextUnitId, map.getDirectionFromShuttle())) {
-
-                        } else if (tryStep(nextUnitId, map.getDirectionFromShuttle())) {
-                            watch(nextUnitId);
-                        }
-                    }
-                    // not else!
-                    if (!map.isUnitOnShuttle(nextUnitId)) {
-                        boolean hasSomeCommand = false;
-                        do {
-                            hasSomeCommand = false;
-                            WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
-                            List<WsDirection> movableDir = map.getKnownSteppableDirections(unitCoordinate);
-
-                            for (WsDirection wsDirection : movableDir) {
-                                WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
-                                if (Coordinating.distance(map.spaceShuttleExitPos, unitCoordinate) <
-                                        Coordinating.distance(map.spaceShuttleExitPos, nextCoordinate)) {
-                                    if (tryStep(nextUnitId, wsDirection)) {
-                                        hasSomeCommand = true;
-                                        watch(nextUnitId);
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (!hasSomeCommand) {
-                                List<WsDirection> tunnelableDir = map.getKnownTunnelableDirections(unitCoordinate);
-
-                                for (WsDirection wsDirection : tunnelableDir) {
-                                    WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
-                                    if (Coordinating.distance(map.spaceShuttleExitPos, unitCoordinate) <
-                                            Coordinating.distance(map.spaceShuttleExitPos, nextCoordinate)) {
-                                        if (tryTunnel(nextUnitId, wsDirection)) {
-                                            hasSomeCommand = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (!hasSomeCommand) {
-                                List<WsDirection> explodableDir = map.getKnownExplodableDirections(unitCoordinate);
-
-                                for (WsDirection wsDirection : explodableDir) {
-                                    WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
-                                    if (Coordinating.distance(map.spaceShuttleExitPos, unitCoordinate) <
-                                            Coordinating.distance(map.spaceShuttleExitPos, nextCoordinate)) {
-                                        if (tryExplode(nextUnitId, wsDirection)) {
-                                            hasSomeCommand = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        } while (hasSomeCommand);
-                    }
-                    for (int i = 3; i > 0; --i) {
-                        if (tryRadar(nextUnitId, i)) {
-                            break;
-                        }
+            System.out.println("Has unit on shuttle - tick left " + map.getTick());
+            map.print();
+            Integer nextUnitId = sleepWhile();
+            System.out.println("NextUnitId: " + nextUnitId);
+            try {
+                watch(nextUnitId);
+                if (map.isUnitOnShuttle(nextUnitId)) {
+                    if (tryExplode(nextUnitId, map.getDirectionFromShuttle())) {
+                        // ...
                     }
 
-                    if (actionCostResponse.getRadar() > 0) {
-                        int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
-                        if (maxCanRadar > 0) {
-                            WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
-                            List<WsCoordinate> otherUnknowns =
-                                    map.getCoordinatesCanRadar(nextUnitId,
-                                            (Field field) -> field == null,
-                                            (WsCoordinate c1, WsCoordinate c2) ->
-                                                    Coordinating.distance(c1, unitCoordinate).compareTo(
-                                                            Coordinating.distance(c2, unitCoordinate)),
-                                            maxCanRadar);
-                            tryRadar(nextUnitId, otherUnknowns);
-                        }
-                    } else {
-                        tryRadar(nextUnitId, map.getCoordinatesCanRadar(nextUnitId,
-                                (a) -> true,
-                                (a, b) -> 0,
-                                49));
+                    if (tryTunnel(nextUnitId, map.getDirectionFromShuttle())) {
+
+                    } else if (tryStep(nextUnitId, map.getDirectionFromShuttle())) {
+                        watch(nextUnitId);
                     }
                 }
-                catch (GameRuntimeException e) {
-                    System.out.println(e.getMessage());
-                }
-            }
-            Map.advanceTick();
-
-        }
-
-        map.print();
-
-        // TODO make the application logic here
-
-        while(true) {
-            // now is some dummy moving
-
-            System.out.println("Tick " + Map.getTick());
-            Set<Integer> ids = map.getMyUnitIds();
-            while(ids.size() > 0) {
-                map.print();
-                System.out.println(map.getLastCommonResponse().toString());
-                Integer nextUnitId = sleepWhile(ids);
-                ids.remove(nextUnitId);
-                System.out.println("NextUnitId: " + nextUnitId);
-
-                try {
-                    watch(nextUnitId);
-
+                // not else!
+                if (!map.isUnitOnShuttle(nextUnitId)) {
                     boolean hasSomeCommand = false;
                     do {
                         hasSomeCommand = false;
                         WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
                         List<WsDirection> movableDir = map.getKnownSteppableDirections(unitCoordinate);
+
+                        for (WsDirection wsDirection : movableDir) {
+                            WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
+                            if (Coordinating.distance(map.spaceShuttleExitPos, unitCoordinate) <
+                                    Coordinating.distance(map.spaceShuttleExitPos, nextCoordinate)) {
+                                if (tryStep(nextUnitId, wsDirection)) {
+                                    hasSomeCommand = true;
+                                    watch(nextUnitId);
+                                    break;
+                                }
+                            }
+                        }
 
                         if (!hasSomeCommand) {
                             List<WsDirection> tunnelableDir = map.getKnownTunnelableDirections(unitCoordinate);
@@ -207,26 +114,106 @@ public class Logic {
                                 }
                             }
                         }
+                    } while (hasSomeCommand);
+                }
+                for (int i = 3; i > 0; --i) {
+                    if (tryRadar(nextUnitId, i)) {
+                        break;
+                    }
+                }
+
+                if (actionCostResponse.getRadar() > 0) {
+                    int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
+                    if (maxCanRadar > 0) {
+                        WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
+                        List<WsCoordinate> otherUnknowns =
+                                map.getCoordinatesCanRadar(nextUnitId,
+                                        (Field field) -> field == null,
+                                        (WsCoordinate c1, WsCoordinate c2) ->
+                                                Coordinating.distance(c1, unitCoordinate).compareTo(
+                                                        Coordinating.distance(c2, unitCoordinate)),
+                                        maxCanRadar);
+                        tryRadar(nextUnitId, otherUnknowns);
+                    }
+                } else {
+                    tryRadar(nextUnitId, map.getCoordinatesCanRadar(nextUnitId,
+                            (a) -> true,
+                            (a, b) -> 0,
+                            49));
+                }
+            }
+            catch (GameRuntimeException e) {
+                System.out.println(e.getMessage());
+
+                if(map.getLastCommonResponse().getTurnsLeft() == 0) {
+                    //run();
+                    return;
+                }
+            }
+        }
+
+        map.print();
+
+        // TODO make the application logic here
+        System.out.println("Real logic starts here " + map.getTick());
+
+        while(true) {
+            // now is some dummy moving
+
+            System.out.println("Tick left " + map.getTick());
+            map.print();
+            System.out.println(map.getLastCommonResponse().toString());
+            Integer nextUnitId = sleepWhile();
+            System.out.println("NextUnitId: " + nextUnitId);
+
+            try {
+                watch(nextUnitId);
+
+                boolean hasSomeCommand = false;
+                do {
+                    hasSomeCommand = false;
+                    WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
+
+                    if (!hasSomeCommand) {
+                        List<WsDirection> tunnelableDir = map.getKnownTunnelableDirections(unitCoordinate);
+
+                        for (WsDirection wsDirection : tunnelableDir) {
+                            WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
+                            if (tryTunnel(nextUnitId, wsDirection)) {
+                                hasSomeCommand = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasSomeCommand) {
+                        List<WsDirection> explodableDir = map.getKnownExplodableDirections(unitCoordinate);
+
+                        for (WsDirection wsDirection : explodableDir) {
+                            WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
+                            if (tryExplode(nextUnitId, wsDirection)) {
+                                hasSomeCommand = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!hasSomeCommand) {
+                        List<WsDirection> movableDir = map.getKnownSteppableDirections(unitCoordinate);
 
                         for (WsDirection wsDirection : movableDir) {
                             WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
-                            if (Coordinating.distance(map.spaceShuttleExitPos, unitCoordinate) <
-                                    Coordinating.distance(map.spaceShuttleExitPos, nextCoordinate)) {
-                                if (tryStep(nextUnitId, wsDirection)) {
-                                    hasSomeCommand = true;
-                                    watch(nextUnitId);
-                                    break;
-                                }
+                            if (tryStep(nextUnitId, wsDirection)) {
+                                hasSomeCommand = true;
+                                watch(nextUnitId);
+                                break;
                             }
                         }
-                    } while (hasSomeCommand);
-                }
-                catch (GameRuntimeException e) {
-                    System.out.println(e.getMessage());
-                }
+                    }
+                } while (hasSomeCommand);
             }
-
-            Map.advanceTick();
+            catch (GameRuntimeException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 
@@ -363,29 +350,32 @@ public class Logic {
     }
 
     private int lastUnitIdWas = -1;
-    public int sleepWhile(Set<Integer> validUnitIds) {
+    public int sleepWhile() {
         while(true) {
             try {
-                IsMyTurnResponse isMyTurnResponse = centralControl.isMyTurn(new IsMyTurnRequest());
-                if (isMyTurnResponse.isIsYourTurn() &&
-                        validUnitIds.contains(isMyTurnResponse.getResult().getBuilderUnit()) &&
-                        lastUnitIdWas != isMyTurnResponse.getResult().getBuilderUnit()) {
-
-                    map.addInfo(isMyTurnResponse);
-
-                    return lastUnitIdWas = isMyTurnResponse.getResult().getBuilderUnit();
-                }
-            } catch (GameRuntimeException e) {
-                // THAT's OK
-                //System.out.println(e.getMessage());
+                Thread.sleep(301L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                System.exit(0);
             }
-            finally {
+
+            IsMyTurnResponse isMyTurnResponse = centralControl.isMyTurn(new IsMyTurnRequest());
+            if (isMyTurnResponse.isIsYourTurn() &&
+                    lastUnitIdWas != isMyTurnResponse.getResult().getBuilderUnit()) {
+
                 try {
-                    Thread.sleep(301L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    map.addInfo(isMyTurnResponse);
+                } catch (GameRuntimeException e) {
+                    if(map.getLastCommonResponse().getTurnsLeft() == 0) {
+                        throw e;
+                    }
+                    // THAT's OK, what we expect
                 }
+
+
+                return lastUnitIdWas = isMyTurnResponse.getResult().getBuilderUnit();
             }
+
         }
     }
 }
