@@ -20,25 +20,30 @@ public class Map {
     Runnable runAfterNOk;
 
     public boolean acceptCache(CommonResp commonResp) {
-        lastCommonResponse = commonResp;
+        setLastCommonResponse(commonResp);
         System.out.println(commonResp);
 
-        if(commonResp.getType() == ResultType.DONE) {
-            if(runAfterOk != null) {
+        if (commonResp.getType() == ResultType.DONE) {
+            if (runAfterOk != null) {
                 runAfterOk.run();
             }
-        }
-        else if(runAfterNOk != null) {
+        } else if (runAfterNOk != null) {
             runAfterNOk.run();
         }
         runAfterNOk = null;
         runAfterOk = null;
+
+        if(commonResp.getType() != ResultType.DONE) {
+            throw new GameRuntimeException("Not valid command");
+        }
 
         return commonResp.getType() == ResultType.DONE;
     }
 
     public void addInfo(StartGameResponse startGameResponse) {
         mapSize = startGameResponse.getSize();
+        mapSize.setX(mapSize.getX() + 1);
+        mapSize.setY(mapSize.getY() + 1);
         System.out.println("Field size is: " + mapSize.getX() + " * " + mapSize.getY());
 
         for(WsBuilderunit wsBuilderunit : startGameResponse.getUnits()) {
@@ -50,17 +55,17 @@ public class Map {
             System.out.println("My unit (id: " + wsBuilderunit.getUnitid() + ") in coord: "
                 + wsBuilderunit.getCord());
         }
-        lastCommonResponse = startGameResponse.getResult();
+        setLastCommonResponse(startGameResponse.getResult());
     }
 
     public void addInfo(RadarResponse radarResponse) {
         setScouts(radarResponse.getScout());
-        lastCommonResponse = radarResponse.getResult();
+        setLastCommonResponse(radarResponse.getResult());
     }
 
     public void addInfo(WatchResponse watchResponse) {
         setScouts(watchResponse.getScout());
-        lastCommonResponse = watchResponse.getResult();
+        setLastCommonResponse(watchResponse.getResult());
     }
 
     public void addInfo(GetSpaceShuttlePosResponse getSpaceShuttlePosResponse) {
@@ -72,7 +77,7 @@ public class Map {
 
         System.out.println("My space shuttle coord: " + spaceShuttlePos);
 
-        lastCommonResponse = getSpaceShuttlePosResponse.getResult();
+        setLastCommonResponse(getSpaceShuttlePosResponse.getResult());
     }
 
     public void addInfo(GetSpaceShuttleExitPosResponse getSpaceShuttleExitPosResponse) {
@@ -86,7 +91,7 @@ public class Map {
 
         System.out.println("My space shuttle exit coord: " + spaceShuttleExitPos);
 
-        lastCommonResponse = getSpaceShuttleExitPosResponse.getResult();
+        setLastCommonResponse(getSpaceShuttleExitPosResponse.getResult());
     }
 
     public void addCache(StructureTunnelRequest structureTunnelRequest) {
@@ -224,6 +229,8 @@ public class Map {
     public List<WsCoordinate> getCoordinatesCanRadar(int unitId, Predicate<Field> predicate, Comparator<WsCoordinate> comparator, int max) {
         WsCoordinate unitCoordinates = getUnit(unitId).getCoordinate();
         return Coordinating.getBoxCoordinates(unitCoordinates, 3).stream()
+                .filter((WsCoordinate wsCoordinate) -> 0 <= wsCoordinate.getX() && wsCoordinate.getX() < mapSize.getX()
+                                                    && 0 <= wsCoordinate.getY() && wsCoordinate.getY() < mapSize.getY())
                 .filter((WsCoordinate wsCoordinate) -> !wsCoordinate.equals(unitCoordinates))
                 .filter((WsCoordinate wsCoordinate) -> predicate.test(knownCoordinates.get(wsCoordinate)))
                 .sorted(comparator)
@@ -275,10 +282,19 @@ public class Map {
     }
 
     public void addInfo(IsMyTurnResponse isMyTurnResponse) {
-        lastCommonResponse = isMyTurnResponse.getResult();
+        setLastCommonResponse(isMyTurnResponse.getResult());
     }
 
     public void addInfo(ActionCostResponse actionCostResponse) {
-        lastCommonResponse = actionCostResponse.getResult();
+        setLastCommonResponse(actionCostResponse.getResult());
+    }
+
+    public void setLastCommonResponse(CommonResp lastCommonResponse) {
+        if(getLastCommonResponse() != null &&
+                lastCommonResponse.getActionPointsLeft() > getLastCommonResponse().getActionPointsLeft()) {
+            this.lastCommonResponse = lastCommonResponse;
+            throw new GameRuntimeException("Action point is bigger");
+        }
+        this.lastCommonResponse = lastCommonResponse;
     }
 }
