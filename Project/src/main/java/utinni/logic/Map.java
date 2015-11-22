@@ -43,6 +43,26 @@ public class Map {
         mapSize = startGameResponse.getSize();
         mapSize.setX(mapSize.getX() + 1);
         mapSize.setY(mapSize.getY() + 1);
+        for(int x = 0; x < mapSize.getX(); ++x) {
+            WsCoordinate coord = new WsCoordinate(x, 0);
+            knownCoordinates.put(coord,
+                    new Field(coord, ObjectType.OBSIDIAN, null, getTick()));
+
+            coord = new WsCoordinate(x, mapSize.getY() - 1);
+            knownCoordinates.put(coord,
+                    new Field(coord, ObjectType.OBSIDIAN, null, getTick()));
+        }
+
+        for(int y = 0; y < mapSize.getX(); ++y) {
+            WsCoordinate coord = new WsCoordinate(0, y);
+            knownCoordinates.put(coord,
+                    new Field(coord, ObjectType.OBSIDIAN, null, getTick()));
+
+            coord = new WsCoordinate(mapSize.getX() - 1, y);
+            knownCoordinates.put(coord,
+                    new Field(coord, ObjectType.OBSIDIAN, null, getTick()));
+        }
+
         System.out.println("Field size is: " + mapSize.getX() + " * " + mapSize.getY());
 
         for(WsBuilderunit wsBuilderunit : startGameResponse.getUnits()) {
