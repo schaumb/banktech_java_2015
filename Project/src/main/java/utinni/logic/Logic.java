@@ -188,7 +188,7 @@ public class Logic {
                                 }
 
                                 if (result == 0) {
-                                    result = Coordinating.distance(c1.getLastAffectingCoordinate(), map.spaceShuttlePos).compareTo(
+                                    result = -Coordinating.distance(c1.getLastAffectingCoordinate(), map.spaceShuttlePos).compareTo(
                                             Coordinating.distance(c2.getLastAffectingCoordinate(), map.spaceShuttlePos));
                                 }
 
