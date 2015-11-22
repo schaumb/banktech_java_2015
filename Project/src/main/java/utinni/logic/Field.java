@@ -1,9 +1,6 @@
 package utinni.logic;
 
-import eu.loxon.centralcontrol.ObjectType;
-import eu.loxon.centralcontrol.Scouting;
-import eu.loxon.centralcontrol.WsBuilderunit;
-import eu.loxon.centralcontrol.WsCoordinate;
+import eu.loxon.centralcontrol.*;
 import utinni.App;
 
 public class Field {
@@ -87,6 +84,20 @@ class BuilderUnitWrapper extends Field {
     }
 
     public int getUnitId() {
+        return unitId;
+    }
+
+    public static Integer getDirectionWeight(int unitId, WsDirection dir) {
+        switch (dir) {
+            case UP:
+                return (0 + unitId) % 4;
+            case DOWN:
+                return (1 + unitId) % 4;
+            case LEFT:
+                return (2 + unitId) % 4;
+            case RIGHT:
+                return (3 + unitId) % 4;
+        }
         return unitId;
     }
 }

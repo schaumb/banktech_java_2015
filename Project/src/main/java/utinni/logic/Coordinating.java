@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class Coordinating {
-
+    
     public static WsCoordinate getNextCoordinate(WsCoordinate wsCoordinate, WsDirection wsDirection) {
         WsCoordinate result = new WsCoordinate();
         result.setX(wsCoordinate.getX());

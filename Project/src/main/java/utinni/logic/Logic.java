@@ -3,9 +3,11 @@ package utinni.logic;
 
 import eu.loxon.centralcontrol.*;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Logic {
 
@@ -17,9 +19,7 @@ public class Logic {
         this.centralControl = centralControl;
     }
 
-    public void run() {
-
-        // First get the static informations
+    private void getFirstInformations() {
         StartGameResponse startGameResponse = centralControl.startGame(new StartGameRequest());
         map.addInfo(startGameResponse);
 
@@ -39,14 +39,21 @@ public class Logic {
 
         map.addInfo(actionCostResponse);
 
+        Command.setCosts(actionCostResponse);
+    }
+    public void run() {
 
-        // beginning strategy
+        // First get the static informations
+        getFirstInformations();
+
         if(map.isReallyFirstTick()) {
             System.out.println("First tick!");
         }
         else {
             System.out.println("Not in the starting position. It's just a continue ~ some bad things can happen");
         }
+
+        // beginning strategy while has unit on shuttle
 
         while(map.hasUnitOnShuttle()) {
             System.out.println("Has unit on shuttle - tick left " + map.getTick());
@@ -121,26 +128,7 @@ public class Logic {
                         break;
                     }
                 }
-
-                if (actionCostResponse.getRadar() > 0) {
-                    int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
-                    if (maxCanRadar > 0) {
-                        WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
-                        List<WsCoordinate> otherUnknowns =
-                                map.getCoordinatesCanRadar(nextUnitId,
-                                        (Field field) -> field == null,
-                                        (WsCoordinate c1, WsCoordinate c2) ->
-                                                Coordinating.distance(c1, unitCoordinate).compareTo(
-                                                        Coordinating.distance(c2, unitCoordinate)),
-                                        maxCanRadar);
-                        tryRadar(nextUnitId, otherUnknowns);
-                    }
-                } else {
-                    tryRadar(nextUnitId, map.getCoordinatesCanRadar(nextUnitId,
-                            (a) -> true,
-                            (a, b) -> 0,
-                            49));
-                }
+                radarAllPoint(nextUnitId);
             }
             catch (GameRuntimeException e) {
                 System.out.println(e.getMessage());
@@ -151,8 +139,6 @@ public class Logic {
                 }
             }
         }
-
-        map.print();
 
         // TODO make the application logic here
         System.out.println("Real logic starts here " + map.getTick());
@@ -167,49 +153,73 @@ public class Logic {
             System.out.println("NextUnitId: " + nextUnitId);
 
             try {
-                watch(nextUnitId);
+                boolean otherCommand = true;
 
-                boolean hasSomeCommand = false;
-                do {
-                    hasSomeCommand = false;
+                while(otherCommand) {
+                    watch(nextUnitId);
+
                     WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
+                    List<Commands> possibleCommands = map.getAllShortKnowDestinaion(nextUnitId).stream()
+                            .sorted((Commands c1, Commands c2) -> {
+                                int points = map.getLastCommonResponse().getActionPointsLeft();
 
-                    if (!hasSomeCommand) {
-                        List<WsDirection> tunnelableDir = map.getKnownTunnelableDirections(unitCoordinate);
+                                Integer c1Cost = c1.getCost();
+                                Integer c2Cost = c2.getCost();
+                                Integer c1Next = c1Cost - c1.getCostMax(points);
+                                Integer c2Next = c2Cost - c2.getCostMax(points);
 
-                        for (WsDirection wsDirection : tunnelableDir) {
-                            WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
-                            if (tryTunnel(nextUnitId, wsDirection)) {
-                                hasSomeCommand = true;
-                                break;
-                            }
+
+                                int result = 0;
+
+                                if (result == 0) {
+                                    result = c1Next.compareTo(c2Next);
+                                }
+
+                                if (result == 0 && c1Next == 0) {
+                                    result = c1Cost.compareTo(c2Cost);
+                                }
+
+                                if (result == 0) {
+                                    if (c1.getLastType() != c2.getLastType()) {
+                                        result = c1.getLastType() == Command.Type.Tunnel
+                                                || c2.getLastType() == Command.Type.Xplore ? -1 : 1;
+                                    }
+                                }
+
+                                if (result == 0) {
+                                    result = Coordinating.distance(c1.getLastCoordinate(), map.spaceShuttlePos).compareTo(
+                                            Coordinating.distance(c2.getLastCoordinate(), map.spaceShuttlePos));
+                                }
+
+                                if (result == 0) {
+                                    result = BuilderUnitWrapper.getDirectionWeight(nextUnitId, c1.getFirstCommand().getDirection()).compareTo(
+                                            BuilderUnitWrapper.getDirectionWeight(nextUnitId, c2.getFirstCommand().getDirection()));
+                                }
+
+                                return result;
+                            }).collect(Collectors.toList());
+
+                    if(possibleCommands.size() == 0) {
+                        otherCommand = false;
+                        continue;
+                    }
+
+                    int points = map.getLastCommonResponse().getActionPointsLeft();
+                    System.out.println("Possible Commands: (AP: " + points + ")");
+                    for(Commands c: possibleCommands) {
+                        System.out.println(c.toString() + " (Now: "+ c.getCostMax(points) + ")" );
+                    }
+
+                    System.out.println();
+
+                    for (Command command : possibleCommands.get(0).getCommands()) {
+                        if (!tryDo(nextUnitId, command)) {
+                            otherCommand = false;
+                            break;
                         }
                     }
-                    if (!hasSomeCommand) {
-                        List<WsDirection> explodableDir = map.getKnownExplodableDirections(unitCoordinate);
-
-                        for (WsDirection wsDirection : explodableDir) {
-                            WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
-                            if (tryExplode(nextUnitId, wsDirection)) {
-                                hasSomeCommand = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!hasSomeCommand) {
-                        List<WsDirection> movableDir = map.getKnownSteppableDirections(unitCoordinate);
-
-                        for (WsDirection wsDirection : movableDir) {
-                            WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(unitCoordinate, wsDirection);
-                            if (tryStep(nextUnitId, wsDirection)) {
-                                hasSomeCommand = true;
-                                watch(nextUnitId);
-                                break;
-                            }
-                        }
-                    }
-                } while (hasSomeCommand);
+                }
+                radarAllPoint(nextUnitId);
             }
             catch (GameRuntimeException e) {
                 System.out.println(e.getMessage());
@@ -241,6 +251,20 @@ public class Logic {
             return true;
         }
         return false;
+    }
+
+    public Boolean tryDo(int unitId, Command command) {
+        switch(command.getCommandType()) {
+            case Move:
+                return tryStep(unitId, command.getDirection());
+            case Tunnel:
+                return tryTunnel(unitId, command.getDirection());
+            case Explode:
+                return tryExplode(unitId, command.getDirection());
+            case Xplore:
+                return tryRadar(unitId, new ArrayList<WsCoordinate>(){{ command.getAffectCoordinate(); }});
+        }
+        return null;
     }
 
     public boolean tryTunnel(int unitId, WsDirection wsDirection) {
@@ -285,6 +309,7 @@ public class Logic {
 
 
                 if(map.acceptCache(moveBuilderUnitResponse.getResult())) {
+                    watch(unitId);
                     return true;
                 }
             }
@@ -317,9 +342,31 @@ public class Logic {
         return false;
     }
 
-    public boolean tryRadar(int unitId, int radius) {
+    public void radarAllPoint(int nextUnitId) {
+        if (actionCostResponse.getRadar() > 0) {
+            int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
+            if (maxCanRadar > 0) {
+                WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
+                List<WsCoordinate> otherUnknowns =
+                        map.getCoordinatesCanRadar(nextUnitId,
+                                (Field field) -> field == null,
+                                (WsCoordinate c1, WsCoordinate c2) ->
+                                        Coordinating.distance(c1, unitCoordinate).compareTo(
+                                                Coordinating.distance(c2, unitCoordinate)),
+                                maxCanRadar);
+                tryRadar(nextUnitId, otherUnknowns);
+            }
+        } else {
+            tryRadar(nextUnitId, map.getCoordinatesCanRadar(nextUnitId,
+                    (a) -> true,
+                    (a, b) -> 0,
+                    49));
+        }
+    }
+
+    public boolean tryRadar(int unitId, int stepRadius) {
         List<WsCoordinate> unknownCoordinates = map.getUnknownCoordinates(
-                map.getUnit(unitId).getCoordinate(), radius);
+                map.getUnit(unitId).getCoordinate(), stepRadius);
 
         return tryRadar(unitId, unknownCoordinates);
     }
@@ -367,7 +414,10 @@ public class Logic {
                     map.addInfo(isMyTurnResponse);
                 } catch (GameRuntimeException e) {
                     if(map.getLastCommonResponse().getTurnsLeft() == 0) {
-                        throw e;
+                        System.exit(0);
+                        // OR
+                        // run();
+                        // return;
                     }
                     // THAT's OK, what we expect
                 }

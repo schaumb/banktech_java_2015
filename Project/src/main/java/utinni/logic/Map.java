@@ -194,8 +194,7 @@ public class Map {
     private List<WsDirection> getDirectionsWithCondition(WsCoordinate wsCoordinate, Predicate<Field> predicate) {
         List<WsDirection> result = new ArrayList<>();
         for(WsDirection wsDirection : WsDirection.values()) {
-            WsCoordinate nextCoordinate = Coordinating.getNextCoordinate(wsCoordinate, wsDirection);
-            if(predicate.test(knownCoordinates.get(nextCoordinate))) {
+            if(predicate.test(knownCoordinates.get(Coordinating.getNextCoordinate(wsCoordinate, wsDirection)))) {
                 result.add(wsDirection);
             }
         }
@@ -306,5 +305,47 @@ public class Map {
         }
 
         this.lastCommonResponse = lastCommonResponse;
+    }
+
+    public List<Command> getNextCommands(Commands commands) {
+        return commands.getNextStep().stream()
+                .filter((Command command) -> {
+                    command.setCommandType(Command.getType(getField(command.getAffectCoordinate())));
+                    return command.isValid();
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<Commands> getAllShortKnowDestinaion(int unitId) {
+        HashSet<WsCoordinate> coordinates = new HashSet<>();
+
+        List<Commands> result = new ArrayList<>();
+
+        Queue<Commands> queue = new PriorityQueue<>((Commands c1, Commands c2) -> c1.getCost().compareTo(c2.getCost()));
+        queue.add(new Commands(getUnit(unitId).getCoordinate()));
+
+        while(queue.size() > 0) {
+            Commands now = queue.remove();
+
+            if(coordinates.contains(now.getLastCoordinate())) {
+                continue;
+            }
+
+            coordinates.add(now.getLastCoordinate());
+
+            if(!now.lastCommandIsNotMove()) {
+                getNextCommands(now).stream()
+                        .filter(nextCommand -> !coordinates.contains(nextCommand.getAffectCoordinate()))
+                        .forEach(nextCommand -> {
+                            Commands newCommands = new Commands(now);
+                            newCommands.addCommand(nextCommand);
+                            queue.add(newCommands);
+                        });
+            }
+            else {
+                result.add(now);
+            }
+        }
+        return result;
     }
 }
