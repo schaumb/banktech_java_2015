@@ -30,7 +30,7 @@ public class StrategyObserver {
                 radarField * Logic.actionCostResponse.getRadar() +
                 watchCount * Logic.actionCostResponse.getWatch();
         return "Can move: " + canMove + "\n"
-                + "Can use action points: " + canMove * 14 + "\n"
+                + "Can use action points: " + canMove * 14 + "\n" // TODO What is this magic number?
                 + "Used action points: " + usedActionPoints + "\n"
                 + "Not used: " + (canMove * 14 - usedActionPoints) + "\n"
                 + "Tunnel make: " + tunnelMake + "\n"

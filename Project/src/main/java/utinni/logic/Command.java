@@ -88,4 +88,22 @@ public class Command {
         return commandType.name().charAt(0) + "" + direction.name().charAt(0);
     }
 
+    @Override
+    public boolean equals(Object rawOther) {
+        if (rawOther == null) {
+            return false;
+        }
+        if (this == rawOther) {
+            return true;
+        }
+        if (!(rawOther instanceof Command)) {
+            return false;
+        }
+
+        Command other = (Command) rawOther;
+
+        return this.commandType == other.commandType
+                && (this.fieldFrom == null ? other.fieldFrom == null : this.fieldFrom.equals(other.fieldFrom))
+                && (this.direction == null ? other.direction == null : this.direction.equals(other.direction));
+    }
 }
