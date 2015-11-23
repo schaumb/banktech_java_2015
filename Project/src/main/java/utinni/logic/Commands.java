@@ -16,7 +16,6 @@ public class Commands {
         this.from = from;
     }
 
-    // TODO This is just creates a shallow copy. That was your original intention?
     public Commands(Commands copy) {
         commands = new ArrayList<>(copy.commands);
         from = copy.from;
@@ -27,7 +26,6 @@ public class Commands {
     }
 
     public void addCommand(Command command) {
-        // Do not forget, you have to use the -enableassertions option at run to enable this
         assert(getLastStandingCoordinate().equals(command.fieldFrom));
         commands.add(command);
     }
@@ -40,7 +38,7 @@ public class Commands {
         int result = 0;
         for(Command c : commands) {
             if(result + c.getCost()  > max) {
-                break; // TODO Why not continue? Maybe the next command will cheaper
+                break;
             }
             else {
                 result += c.getCost();

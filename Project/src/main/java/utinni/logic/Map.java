@@ -39,6 +39,8 @@ public class Map {
     public void addInfo(StartGameResponse startGameResponse) {
         setLastCommonResponse(startGameResponse.getResult());
 
+        StrategyObserver.get().actionPoint = startGameResponse.getResult().getActionPointsLeft();
+
         mapSize = startGameResponse.getSize();
         mapSize.setX(mapSize.getX() + 1);
         mapSize.setY(mapSize.getY() + 1);
@@ -52,7 +54,7 @@ public class Map {
                     new Field(coord, ObjectType.OBSIDIAN, null, getTick()));
         }
 
-        for(int y = 0; y < mapSize.getX(); ++y) {
+        for(int y = 0; y < mapSize.getY(); ++y) {
             WsCoordinate coord = new WsCoordinate(0, y);
             knownCoordinates.put(coord,
                     new Field(coord, ObjectType.OBSIDIAN, null, getTick()));
@@ -314,6 +316,10 @@ public class Map {
 
         if(getLastCommonResponse() != null &&
                 lastCommonResponse.getScore().getBonus() < this.lastCommonResponse.getScore().getBonus()) {
+            if (StrategyObserver.get().lostBonusTurnLeft != lastCommonResponse.getTurnsLeft() &&
+                    StrategyObserver.LOST_BONUS_AT_FINISH_START_TICK >= lastCommonResponse.getTurnsLeft()) {
+                ++StrategyObserver.get().lostBonusAtFinish;
+            }
             StrategyObserver.get().lostBonusTurnLeft = lastCommonResponse.getTurnsLeft();
         }
 
@@ -328,11 +334,13 @@ public class Map {
         if(lastCommonResponse.getType() != ResultType.DONE) {
             ++StrategyObserver.get().badRequest;
             this.lastCommonResponse = lastCommonResponse;
+            System.out.println("Bad request at:" + new Date());
             throw new GameRuntimeException("Not valid command");
         }
 
         if(getLastCommonResponse() != null &&
                 lastCommonResponse.getActionPointsLeft() > getLastCommonResponse().getActionPointsLeft()) {
+            // TODO We should change or remove this logic
             this.lastCommonResponse = lastCommonResponse;
             throw new GameRuntimeException("Action point is bigger");
         }

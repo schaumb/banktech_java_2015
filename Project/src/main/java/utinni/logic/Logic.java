@@ -4,6 +4,7 @@ package utinni.logic;
 import eu.loxon.centralcontrol.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -200,7 +201,7 @@ public class Logic {
                                 }
 
                                 if (result == 0) {
-                                    result = -Coordinating.distance(c1.getLastAffectingCoordinate(), map.spaceShuttlePos).compareTo(
+                                    result = Coordinating.distance(c1.getLastAffectingCoordinate(), map.spaceShuttlePos).compareTo(
                                             Coordinating.distance(c2.getLastAffectingCoordinate(), map.spaceShuttlePos));
                                 }
 
@@ -495,6 +496,7 @@ public class Logic {
                     // run();
                     // return;
                 }
+                System.out.println("Our turn started at:" + new Date());
                 ++StrategyObserver.get().canMove;
                 return lastUnitIdWas = isMyTurnResponse.getResult().getBuilderUnit();
             }
