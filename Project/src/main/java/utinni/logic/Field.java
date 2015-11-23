@@ -56,8 +56,15 @@ public class Field {
     }
 
     public boolean isEnemy() {
-        return !isOurs() &&
-                (isTunnel() || isBuilderUnit());
+        return isEnemyBuilder() || isEnemyTunnel();
+    }
+
+    public boolean isEnemyBuilder() {
+        return !isOurs() && isBuilderUnit();
+    }
+
+    public boolean isEnemyTunnel() {
+        return !isOurs() && isTunnel();
     }
 
     public boolean isSteppable() {

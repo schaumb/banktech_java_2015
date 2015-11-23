@@ -395,4 +395,10 @@ public class Map {
         }
         return result;
     }
+
+    public void hackingEnemyBuilderUnits() {
+        knownCoordinates.values().stream()
+                .filter(f -> f.isEnemyBuilder())
+                .forEach(f -> f.getScouting().setObject(ObjectType.TUNNEL));
+    }
 }

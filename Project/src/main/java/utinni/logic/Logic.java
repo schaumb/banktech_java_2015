@@ -5,6 +5,7 @@ import eu.loxon.centralcontrol.*;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -148,7 +149,7 @@ public class Logic {
 
             try {
                 boolean otherCommand = true;
-
+                map.hackingEnemyBuilderUnits();
                 watch(nextUnitId);
                 while(otherCommand) {
                     map.print();
@@ -400,19 +401,20 @@ public class Logic {
                 List<WsCoordinate> otherRefresh =
                         map.getCoordinatesCanRadar(nextUnitId,
                                 (Field field) -> field != null &&
-                                        (field.isGranite() ||
-                                                field.isSteppable() ||
-                                                field.isTunnelable()) &&
+                                        (field.isSteppable() ||
+                                                field.isTunnelable() ||
+                                                field.isEnemy()) &&
                                         Coordinating.distance(field.getCoordinate(), unitCoordinate) > 1,
                                 (WsCoordinate c1, WsCoordinate c2) -> {
-                                    Integer weight1 = Coordinating.distance(c1, unitCoordinate) * 2;
-                                    Integer weight2 = Coordinating.distance(c2, unitCoordinate) * 2;
+                                    Integer weight1 = Coordinating.distance(c1, unitCoordinate) * 3;
+                                    Integer weight2 = Coordinating.distance(c2, unitCoordinate) * 3;
+
                                     weight1 -= (int)Coordinating.getCoordinatesToRadius(c1, 1).stream()
                                         .filter((WsCoordinate c) -> map.knownCoordinates.containsKey(c) && map.getField(c).isEnemy())
-                                        .count() * 3;
+                                        .count() * 2;
                                     weight2 -= (int)Coordinating.getCoordinatesToRadius(c2, 1).stream()
                                         .filter((WsCoordinate c) -> map.knownCoordinates.containsKey(c) && map.getField(c).isEnemy())
-                                        .count() * 3;
+                                        .count() * 2;
 
                                     weight1 -= (int)Coordinating.getCoordinatesToRadius(c1, 1).stream()
                                         .filter((WsCoordinate c) -> !map.knownCoordinates.containsKey(c))
@@ -424,6 +426,10 @@ public class Logic {
                                     return weight1.compareTo(weight2);
                                 },
                                 maxCanRadar);
+
+                System.out.println("Refresh Danger places:");
+                System.out.println(Arrays.toString(otherRefresh.toArray()));
+
                 tryRadar(nextUnitId, otherRefresh);
             }
         } else {
