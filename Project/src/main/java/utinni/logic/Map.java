@@ -26,7 +26,6 @@ public class Map {
                 runAfterOk.run();
             }
         } else if (runAfterNOk != null) {
-            ++StrategyObserver.get().badRequest;
             runAfterNOk.run();
         }
         runAfterNOk = null;
@@ -326,15 +325,16 @@ public class Map {
             System.out.println("Lost another " + count + " tunnel.");
         }
 
+        if(lastCommonResponse.getType() != ResultType.DONE) {
+            ++StrategyObserver.get().badRequest;
+            this.lastCommonResponse = lastCommonResponse;
+            throw new GameRuntimeException("Not valid command");
+        }
+
         if(getLastCommonResponse() != null &&
                 lastCommonResponse.getActionPointsLeft() > getLastCommonResponse().getActionPointsLeft()) {
             this.lastCommonResponse = lastCommonResponse;
             throw new GameRuntimeException("Action point is bigger");
-        }
-
-        if(lastCommonResponse.getType() != ResultType.DONE) {
-            this.lastCommonResponse = lastCommonResponse;
-            throw new GameRuntimeException("Not valid command");
         }
 
         this.lastCommonResponse = lastCommonResponse;

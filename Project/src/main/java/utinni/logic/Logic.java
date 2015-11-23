@@ -126,16 +126,11 @@ public class Logic {
                         break;
                     }
                 }
-                radarAllPoint(nextUnitId);
+                radarAllUnknownPoint(nextUnitId);
+                radarRefreshDangerousPoint(nextUnitId);
             }
             catch (GameRuntimeException e) {
                 System.out.println(e.getMessage());
-                /*
-                if(map.getLastCommonResponse().getTurnsLeft() == 0) {
-                    //run();
-                    return;
-                }
-                */
             }
         }
 
@@ -153,14 +148,15 @@ public class Logic {
             try {
                 boolean otherCommand = true;
 
+                watch(nextUnitId);
                 while(otherCommand) {
-                    watch(nextUnitId);
                     map.print();
 
                     BuilderUnitWrapper.targets.remove(nextUnitId);
-
+                    boolean containExplode = map.getLastCommonResponse().getExplosivesLeft() > 0;
                     List<Commands> possibleCommands = map.getAllShortKnowDestination(nextUnitId).stream()
                             .filter((Commands c1) -> !BuilderUnitWrapper.targets.containsValue(c1.getLastAffectingCoordinate()))
+                            .filter((Commands c1) -> containExplode || c1.noExplode())
                             .sorted((Commands c1, Commands c2) -> {
                                 int points = map.getLastCommonResponse().getActionPointsLeft();
 
@@ -184,6 +180,22 @@ public class Logic {
                                     if (c1.getLastType() != c2.getLastType()) {
                                         result = c1.getLastType() == Command.Type.Explode
                                                 || c2.getLastType() == Command.Type.Xplore ? -1 : 1;
+                                    }
+                                }
+
+                                // TODO here not important that drill when neighbours contains 1 other's tunnel
+                                //  if we don't need (maybe got worst logic) just comment it
+                                if (result == 0) {
+                                    if(c1.getLastType() == Command.Type.Tunnel) {
+                                        Long enemies1 = Coordinating.getCoordinatesToRadius(c1.getLastAffectingCoordinate(), 1).stream()
+                                                .filter((WsCoordinate wc) -> map.getField(wc) != null && map.getField(wc).isEnemy())
+                                                .count();
+
+                                        Long enemies2 = Coordinating.getCoordinatesToRadius(c2.getLastAffectingCoordinate(), 1).stream()
+                                                .filter((WsCoordinate wc) -> map.getField(wc) != null && map.getField(wc).isEnemy())
+                                                .count();
+
+                                        result = enemies1.compareTo(enemies2);
                                     }
                                 }
 
@@ -224,7 +236,8 @@ public class Logic {
                         }
                     }
                 }
-                radarAllPoint(nextUnitId);
+                radarAllUnknownPoint(nextUnitId);
+                radarRefreshDangerousPoint(nextUnitId);
             }
             catch (GameRuntimeException e) {
                 System.out.println(e.getMessage());
@@ -275,6 +288,7 @@ public class Logic {
 
     public boolean tryTunnel(int unitId, WsDirection wsDirection) {
         Field tryTunnelField = map.getFieldFromUnit(unitId, wsDirection);
+        assert(tryTunnelField.isTunnelable());
         if(tryTunnelField.isTunnelable()) {
             // if we have enough energy to tunnel
             if(map.getLastCommonResponse().getActionPointsLeft() >=
@@ -300,8 +314,9 @@ public class Logic {
     }
 
     public boolean tryStep(int unitId, WsDirection wsDirection) {
-        Field tryTunnelField = map.getFieldFromUnit(unitId, wsDirection);
-        if(tryTunnelField.isSteppable()) {
+        Field tryStepField = map.getFieldFromUnit(unitId, wsDirection);
+        assert(tryStepField.isSteppable());
+        if(tryStepField.isSteppable()) {
             // if we have enough energy to tunnel
             if(map.getLastCommonResponse().getActionPointsLeft() >=
                     actionCostResponse.getMove()) {
@@ -328,6 +343,7 @@ public class Logic {
 
     public boolean tryExplode(int unitId, WsDirection wsDirection) {
         Field tryExplodeField = map.getFieldFromUnit(unitId, wsDirection);
+        assert(tryExplodeField.isExpodable());
         if(tryExplodeField.isExpodable()) {
             // if we have enough energy to tunnel
             if(map.getLastCommonResponse().getActionPointsLeft() >=
@@ -352,7 +368,7 @@ public class Logic {
         return false;
     }
 
-    public void radarAllPoint(int nextUnitId) {
+    public void radarAllUnknownPoint(int nextUnitId) {
         if (actionCostResponse.getRadar() > 0) {
             int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
             if (maxCanRadar > 0) {
@@ -372,6 +388,50 @@ public class Logic {
                     (a, b) -> 0,
                     49));
         }
+    }
+
+    public void radarRefreshDangerousPoint(int nextUnitId) {
+        // TODO check that it's working fine
+        if (actionCostResponse.getRadar() > 0) {
+            int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
+            if (maxCanRadar > 0) {
+                WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
+                List<WsCoordinate> otherRefresh =
+                        map.getCoordinatesCanRadar(nextUnitId,
+                                (Field field) -> field != null &&
+                                        (field.isGranite() ||
+                                                field.isSteppable() ||
+                                                field.isTunnelable()) &&
+                                        Coordinating.distance(field.getCoordinate(), unitCoordinate) > 1,
+                                (WsCoordinate c1, WsCoordinate c2) -> {
+                                    Integer weight1 = Coordinating.distance(c1, unitCoordinate) * 2;
+                                    Integer weight2 = Coordinating.distance(c2, unitCoordinate) * 2;
+                                    weight1 -= (int)Coordinating.getCoordinatesToRadius(c1, 1).stream()
+                                        .filter((WsCoordinate c) -> map.knownCoordinates.containsKey(c) && map.getField(c).isEnemy())
+                                        .count() * 3;
+                                    weight2 -= (int)Coordinating.getCoordinatesToRadius(c2, 1).stream()
+                                        .filter((WsCoordinate c) -> map.knownCoordinates.containsKey(c) && map.getField(c).isEnemy())
+                                        .count() * 3;
+
+                                    weight1 -= (int)Coordinating.getCoordinatesToRadius(c1, 1).stream()
+                                        .filter((WsCoordinate c) -> !map.knownCoordinates.containsKey(c))
+                                        .count();
+                                    weight2 -= (int)Coordinating.getCoordinatesToRadius(c2, 1).stream()
+                                        .filter((WsCoordinate c) -> !map.knownCoordinates.containsKey(c))
+                                        .count();
+
+                                    return weight1.compareTo(weight2);
+                                },
+                                maxCanRadar);
+                tryRadar(nextUnitId, otherRefresh);
+            }
+        } else {
+            tryRadar(nextUnitId, map.getCoordinatesCanRadar(nextUnitId,
+                    (a) -> true,
+                    (a, b) -> 0,
+                    49));
+        }
+
     }
 
     public boolean tryRadar(int unitId, int stepRadius) {

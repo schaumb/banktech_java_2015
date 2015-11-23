@@ -104,6 +104,10 @@ public class Commands implements Cloneable {
         return getLastType() != Command.Type.Move;
     }
 
+    public boolean noExplode() {
+        return commands.stream().allMatch((Command command) -> command.getCommandType() != Command.Type.Explode);
+    }
+
     @Override
     public String toString() {
         return "[" + commands.stream()
