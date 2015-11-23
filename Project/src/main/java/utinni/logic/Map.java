@@ -315,7 +315,8 @@ public class Map {
         System.out.println(lastCommonResponse);
 
         if(getLastCommonResponse() != null &&
-                lastCommonResponse.getScore().getBonus() < this.lastCommonResponse.getScore().getBonus()) {
+                lastCommonResponse.getScore().getBonus() == 0 &&
+                this.lastCommonResponse.getScore().getBonus() != 0) {
             if (StrategyObserver.get().lostBonusTurnLeft != lastCommonResponse.getTurnsLeft() &&
                     StrategyObserver.LOST_BONUS_AT_FINISH_START_TICK >= lastCommonResponse.getTurnsLeft()) {
                 ++StrategyObserver.get().lostBonusAtFinish;

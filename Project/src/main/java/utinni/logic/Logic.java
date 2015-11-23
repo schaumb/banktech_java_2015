@@ -149,7 +149,7 @@ public class Logic {
 
             try {
                 boolean otherCommand = true;
-                map.hackingEnemyBuilderUnits();
+                //map.hackingEnemyBuilderUnits();
                 watch(nextUnitId);
                 while(otherCommand) {
                     map.print();
