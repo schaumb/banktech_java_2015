@@ -54,6 +54,8 @@
                 <configuration>
                     <archive>
                         <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>utinni.App</mainClass>
                         </manifest>
                     </archive>
@@ -69,6 +71,31 @@
                     <target>8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                  <execution>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>single</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
+                  <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                  </descriptorRefs>
+                    <archive>
+                      <manifest>
+                        <addClasspath>true</addClasspath>
+                        <mainClass>utinni.App</mainClass>
+                      </manifest>
+                  </archive>
+                </configuration>
+
+    
+              </plugin>
 
             <plugin>
                 <groupId>org.jvnet.jax-ws-commons</groupId>
