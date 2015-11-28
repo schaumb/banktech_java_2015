@@ -92,7 +92,7 @@ public class Map {
 
         knownCoordinates.put(spaceShuttlePos,
                 new Field(spaceShuttlePos,
-                        ObjectType.SHUTTLE, App.user, getTick()));
+                        ObjectType.SHUTTLE, App.getMyUser(), getTick()));
 
         System.out.println("My space shuttle coord: " + spaceShuttlePos);
 
@@ -121,7 +121,7 @@ public class Map {
 
         runAfterOk = () -> {
             knownCoordinates.put(nextField,
-                    new Field(nextField, ObjectType.TUNNEL, App.user, getTick()));
+                    new Field(nextField, ObjectType.TUNNEL, App.getMyUser(), getTick()));
             getLastCommonResponse().getScore().setReward(getLastCommonResponse().getScore().getReward() + 100);
         };
         runAfterNOk = () -> knownCoordinates.remove(nextField);
@@ -148,7 +148,7 @@ public class Map {
         runAfterOk = () -> {
             if(!unit.getCoordinate().equals(spaceShuttlePos)) {
                 knownCoordinates.put(unit.getCoordinate(), new Field(unit.getCoordinate(),
-                        ObjectType.TUNNEL, App.user, getTick()));
+                        ObjectType.TUNNEL, App.getMyUser(), getTick()));
             }
             unit.setWhen(getTick());
             unit.getScouting().setCord(nextField);

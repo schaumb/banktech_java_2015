@@ -39,7 +39,7 @@ public class Field {
     public boolean isEmpty() { return getObjectType() == null; }
 
     public boolean isOurs() {
-        return App.user.equals(scouting.getTeam());
+        return App.getMyUser().equals(scouting.getTeam());
     }
 
     public boolean isControllable() {
@@ -93,7 +93,7 @@ class BuilderUnitWrapper extends Field {
     int unitId;
 
     public BuilderUnitWrapper (WsBuilderunit wsBuilderunit, int when) {
-        super(wsBuilderunit.getCord(), ObjectType.BUILDER_UNIT, App.user, when);
+        super(wsBuilderunit.getCord(), ObjectType.BUILDER_UNIT, App.getMyUser(), when);
         this.unitId = wsBuilderunit.getUnitid();
     }
 
