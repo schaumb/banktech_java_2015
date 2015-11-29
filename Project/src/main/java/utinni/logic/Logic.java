@@ -267,7 +267,6 @@ public class Logic {
             System.out.println(watchResponse);
 
             map.addInfo(watchResponse);
-            ++StrategyObserver.get().watchCount;
 
             return true;
         }
@@ -306,8 +305,6 @@ public class Logic {
                         = centralControl.structureTunnel(structureTunnelRequest);
 
                 if(map.acceptCache(structureTunnelResponse.getResult())) {
-                    ++StrategyObserver.get().tunnelMake;
-
                     return true;
                 }
             }
@@ -335,7 +332,6 @@ public class Logic {
 
                 if(map.acceptCache(moveBuilderUnitResponse.getResult())) {
                     watch(unitId);
-                    ++StrategyObserver.get().move;
                     return true;
                 }
             }
@@ -362,7 +358,6 @@ public class Logic {
                         = centralControl.explodeCell(explodeCellRequest);
 
                 if(map.acceptCache(explodeCellResponse.getResult())) {
-                    ++StrategyObserver.get().explode;
                     return true;
                 }
             }
@@ -468,9 +463,6 @@ public class Logic {
 
             map.addInfo(radarResponse);
 
-            ++StrategyObserver.get().radarCount;
-            StrategyObserver.get().radarField += coordinates.size();
-
             return true;
         }
         return false;
@@ -503,7 +495,6 @@ public class Logic {
                     // return;
                 }
                 System.out.println("Our turn started at:" + new Date());
-                ++StrategyObserver.get().canMove;
                 return lastUnitIdWas = isMyTurnResponse.getResult().getBuilderUnit();
             }
         }

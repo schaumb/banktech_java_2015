@@ -2,6 +2,7 @@ package utinni.logic;
 
 import eu.loxon.centralcontrol.*;
 import utinni.App;
+import utinni.status.GameStatus;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -38,8 +39,6 @@ public class Map {
 
     public void addInfo(StartGameResponse startGameResponse) {
         setLastCommonResponse(startGameResponse.getResult());
-
-        StrategyObserver.get().actionPoint = startGameResponse.getResult().getActionPointsLeft();
 
         mapSize = startGameResponse.getSize();
         mapSize.setX(mapSize.getX() + 1);
@@ -92,7 +91,7 @@ public class Map {
 
         knownCoordinates.put(spaceShuttlePos,
                 new Field(spaceShuttlePos,
-                        ObjectType.SHUTTLE, App.getMyUser(), getTick()));
+                        ObjectType.SHUTTLE, GameStatus.get().userName, getTick()));
 
         System.out.println("My space shuttle coord: " + spaceShuttlePos);
 
@@ -121,7 +120,7 @@ public class Map {
 
         runAfterOk = () -> {
             knownCoordinates.put(nextField,
-                    new Field(nextField, ObjectType.TUNNEL, App.getMyUser(), getTick()));
+                    new Field(nextField, ObjectType.TUNNEL, GameStatus.get().userName, getTick()));
             getLastCommonResponse().getScore().setReward(getLastCommonResponse().getScore().getReward() + 100);
         };
         runAfterNOk = () -> knownCoordinates.remove(nextField);
@@ -148,7 +147,7 @@ public class Map {
         runAfterOk = () -> {
             if(!unit.getCoordinate().equals(spaceShuttlePos)) {
                 knownCoordinates.put(unit.getCoordinate(), new Field(unit.getCoordinate(),
-                        ObjectType.TUNNEL, App.getMyUser(), getTick()));
+                        ObjectType.TUNNEL, GameStatus.get().userName, getTick()));
             }
             unit.setWhen(getTick());
             unit.getScouting().setCord(nextField);
@@ -270,7 +269,7 @@ public class Map {
     }
 
     void print(PrintStream out) {
-        out.println(StrategyObserver.get());
+        out.println(GameStatus.get());
         for(int y = mapSize.getY() - 1; y >= 0; --y) {
             for(int x = 0; x < mapSize.getX(); ++x) {
                 Field field = getField(x, y);
@@ -314,26 +313,7 @@ public class Map {
     public void setLastCommonResponse(CommonResp lastCommonResponse) {
         System.out.println(lastCommonResponse);
 
-        if(getLastCommonResponse() != null &&
-                lastCommonResponse.getScore().getBonus() == 0 &&
-                this.lastCommonResponse.getScore().getBonus() != 0) {
-            if (StrategyObserver.get().lostBonusTurnLeft != lastCommonResponse.getTurnsLeft() &&
-                    StrategyObserver.LOST_BONUS_AT_FINISH_START_TICK >= lastCommonResponse.getTurnsLeft()) {
-                ++StrategyObserver.get().lostBonusAtFinish;
-            }
-            StrategyObserver.get().lostBonusTurnLeft = lastCommonResponse.getTurnsLeft();
-        }
-
-        if(getLastCommonResponse() != null &&
-            lastCommonResponse.getScore().getReward() < this.lastCommonResponse.getScore().getReward()) {
-            long count = (this.lastCommonResponse.getScore().getReward() - lastCommonResponse.getScore().getReward()) / 100;
-            StrategyObserver.get().tunnelLost += (int)count;
-
-            System.out.println("Lost another " + count + " tunnel.");
-        }
-
         if(lastCommonResponse.getType() != ResultType.DONE) {
-            ++StrategyObserver.get().badRequest;
             this.lastCommonResponse = lastCommonResponse;
             System.out.println("Bad request at:" + new Date());
             throw new GameRuntimeException("Not valid command");

@@ -2,6 +2,7 @@ package utinni.logic;
 
 import eu.loxon.centralcontrol.*;
 import utinni.App;
+import utinni.status.GameStatus;
 
 import java.util.HashMap;
 
@@ -39,7 +40,7 @@ public class Field {
     public boolean isEmpty() { return getObjectType() == null; }
 
     public boolean isOurs() {
-        return App.getMyUser().equals(scouting.getTeam());
+        return GameStatus.get().userName.equals(scouting.getTeam());
     }
 
     public boolean isControllable() {
@@ -93,7 +94,7 @@ class BuilderUnitWrapper extends Field {
     int unitId;
 
     public BuilderUnitWrapper (WsBuilderunit wsBuilderunit, int when) {
-        super(wsBuilderunit.getCord(), ObjectType.BUILDER_UNIT, App.getMyUser(), when);
+        super(wsBuilderunit.getCord(), ObjectType.BUILDER_UNIT, GameStatus.get().userName, when);
         this.unitId = wsBuilderunit.getUnitid();
     }
 
