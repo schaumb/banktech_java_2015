@@ -2,6 +2,7 @@
 package utinni.logic;
 
 import eu.loxon.centralcontrol.*;
+import utinni.status.GameStatus;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,8 +38,6 @@ public class Logic {
 
         actionCostResponse = centralControl.getActionCost(new ActionCostRequest());
 
-        map.addInfo(actionCostResponse);
-
         Command.setCosts(actionCostResponse);
     }
     public void run() {
@@ -56,7 +55,7 @@ public class Logic {
         // beginning strategy while has unit on shuttle
 
         while(map.hasUnitOnShuttle()) {
-            System.out.println("Has unit on shuttle - tick left " + map.getTick());
+            System.out.println("Has unit on shuttle - tick left " + GameStatus.get().tick);
             map.print();
             Integer nextUnitId = sleepWhile();
             System.out.println("NextUnitId: " + nextUnitId);
@@ -137,13 +136,13 @@ public class Logic {
         }
 
         // TODO make the application logic here
-        System.out.println("Real logic starts here " + map.getTick());
+        System.out.println("Real logic starts here " + GameStatus.get().tick);
 
         while(true) {
 
-            System.out.println("Tick left " + map.getTick());
+            System.out.println("Tick left " + GameStatus.get().tick);
             map.print();
-            System.out.println(map.getLastCommonResponse().toString());
+            System.out.println(GameStatus.get());
             Integer nextUnitId = sleepWhile();
             System.out.println("NextUnitId: " + nextUnitId);
 
@@ -155,12 +154,12 @@ public class Logic {
                     map.print();
 
                     BuilderUnitWrapper.targets.remove(nextUnitId);
-                    boolean containExplode = map.getLastCommonResponse().getExplosivesLeft() > 0;
+                    boolean containExplode = GameStatus.get().explosionsLeft > 0;
                     List<Commands> possibleCommands = map.getAllShortKnowDestination(nextUnitId).stream()
                             .filter((Commands c1) -> !BuilderUnitWrapper.targets.containsValue(c1.getLastAffectingCoordinate()))
                             .filter((Commands c1) -> containExplode || c1.noExplode())
                             .sorted((Commands c1, Commands c2) -> {
-                                int points = map.getLastCommonResponse().getActionPointsLeft();
+                                int points = GameStatus.get().actionPointsLeft;
 
                                 Integer c1Cost = c1.getCost();
                                 Integer c2Cost = c2.getCost();
@@ -219,7 +218,7 @@ public class Logic {
                         continue;
                     }
 
-                    int points = map.getLastCommonResponse().getActionPointsLeft();
+                    int points = GameStatus.get().actionPointsLeft;
                     System.out.println("Possible Commands: (AP: " + points + ")");
                     for(Commands c: possibleCommands) {
                         System.out.println(c.toString() + " (Now: "+ c.getCostMax(points) + ")" );
@@ -231,7 +230,7 @@ public class Logic {
 
                     for (Command command : possibleCommands.get(0).getCommands()) {
                         if (!tryDo(nextUnitId, command)) {
-                            if(command.getCommandType().getCost() > map.getLastCommonResponse().getActionPointsLeft()) {
+                            if(command.getCommandType().getCost() > GameStatus.get().actionPointsLeft) {
                                 otherCommand = false;
                             }
                             break;
@@ -256,7 +255,7 @@ public class Logic {
                 unknownCoordinates.size() * actionCostResponse.getRadar()) {
             return tryRadar(unitId, 1);
         }
-        else if(map.getLastCommonResponse().getActionPointsLeft() >=
+        else if(GameStatus.get().actionPointsLeft >=
                 actionCostResponse.getWatch()) {
 
             WatchRequest watchRequest = new WatchRequest();
@@ -292,7 +291,7 @@ public class Logic {
         assert(tryTunnelField.isTunnelable());
         if(tryTunnelField.isTunnelable()) {
             // if we have enough energy to tunnel
-            if(map.getLastCommonResponse().getActionPointsLeft() >=
+            if(GameStatus.get().actionPointsLeft >=
                     actionCostResponse.getDrill()) {
 
                 StructureTunnelRequest structureTunnelRequest = new StructureTunnelRequest();
@@ -304,7 +303,7 @@ public class Logic {
                 StructureTunnelResponse structureTunnelResponse
                         = centralControl.structureTunnel(structureTunnelRequest);
 
-                if(map.acceptCache(structureTunnelResponse.getResult())) {
+                if(map.acceptCache(structureTunnelResponse.getResult().getType() == ResultType.DONE)) {
                     return true;
                 }
             }
@@ -317,7 +316,7 @@ public class Logic {
         assert(tryStepField.isSteppable());
         if(tryStepField.isSteppable()) {
             // if we have enough energy to tunnel
-            if(map.getLastCommonResponse().getActionPointsLeft() >=
+            if(GameStatus.get().actionPointsLeft >=
                     actionCostResponse.getMove()) {
 
                 MoveBuilderUnitRequest moveBuilderUnitRequest = new MoveBuilderUnitRequest();
@@ -330,7 +329,7 @@ public class Logic {
                         = centralControl.moveBuilderUnit(moveBuilderUnitRequest);
 
 
-                if(map.acceptCache(moveBuilderUnitResponse.getResult())) {
+                if(map.acceptCache(moveBuilderUnitResponse.getResult().getType() == ResultType.DONE)) {
                     watch(unitId);
                     return true;
                 }
@@ -344,9 +343,9 @@ public class Logic {
         assert(tryExplodeField.isExpodable());
         if(tryExplodeField.isExpodable()) {
             // if we have enough energy to tunnel
-            if(map.getLastCommonResponse().getActionPointsLeft() >=
+            if(GameStatus.get().actionPointsLeft >=
                     actionCostResponse.getExplode() &&
-                    map.getLastCommonResponse().getExplosivesLeft() > 0) {
+                    GameStatus.get().explosionsLeft > 0) {
 
                 ExplodeCellRequest explodeCellRequest = new ExplodeCellRequest();
                 explodeCellRequest.setUnit(unitId);
@@ -357,7 +356,7 @@ public class Logic {
                 ExplodeCellResponse explodeCellResponse
                         = centralControl.explodeCell(explodeCellRequest);
 
-                if(map.acceptCache(explodeCellResponse.getResult())) {
+                if(map.acceptCache(explodeCellResponse.getResult().getType() == ResultType.DONE)) {
                     return true;
                 }
             }
@@ -367,7 +366,7 @@ public class Logic {
 
     public void radarAllUnknownPoint(int nextUnitId) {
         if (actionCostResponse.getRadar() > 0) {
-            int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
+            int maxCanRadar = GameStatus.get().actionPointsLeft / actionCostResponse.getRadar();
             if (maxCanRadar > 0) {
                 WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
                 List<WsCoordinate> otherUnknowns =
@@ -390,7 +389,7 @@ public class Logic {
     public void radarRefreshDangerousPoint(int nextUnitId) {
         // TODO check that it's working fine
         if (actionCostResponse.getRadar() > 0) {
-            int maxCanRadar = map.getLastCommonResponse().getActionPointsLeft() / actionCostResponse.getRadar();
+            int maxCanRadar = GameStatus.get().actionPointsLeft / actionCostResponse.getRadar();
             if (maxCanRadar > 0) {
                 WsCoordinate unitCoordinate = map.getUnit(nextUnitId).getCoordinate();
                 List<WsCoordinate> otherRefresh =
@@ -445,7 +444,7 @@ public class Logic {
 
     public boolean tryRadar(int unitId, List<WsCoordinate> coordinates) {
         // if we have enough energy to radar some cells
-        if(map.getLastCommonResponse().getActionPointsLeft() >=
+        if(GameStatus.get().actionPointsLeft >=
                 coordinates.size() * actionCostResponse.getRadar()) {
 
             if(coordinates.size() == 0) {
@@ -478,17 +477,16 @@ public class Logic {
                 System.exit(0);
             }
 
-            IsMyTurnResponse isMyTurnResponse = centralControl.isMyTurn(new IsMyTurnRequest());
-            if (isMyTurnResponse.isIsYourTurn() &&
+            IsMyTurnResponse isMyTurnResponse = null;
+            try { // TODO This will be good after the service call update.
+                isMyTurnResponse = centralControl.isMyTurn(new IsMyTurnRequest());
+            } catch (GameRuntimeException e) {
+                // THAT's OK, what we expect
+            }
+            if (isMyTurnResponse != null && isMyTurnResponse.isIsYourTurn() &&
                     lastUnitIdWas != isMyTurnResponse.getResult().getBuilderUnit()) {
 
-                try {
-                    map.addInfo(isMyTurnResponse);
-                } catch (GameRuntimeException e) {
-                    // THAT's OK, what we expect
-                }
-
-                if(map.getLastCommonResponse().getTurnsLeft() == 0) {
+                if(GameStatus.get().tick == 0) {
                     System.exit(0);
                     // OR
                     // run();

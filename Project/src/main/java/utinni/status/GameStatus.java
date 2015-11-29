@@ -3,6 +3,7 @@ package utinni.status;
 import eu.loxon.centralcontrol.*;
 import utinni.Config;
 import utinni.integration.ServiceWrapper;
+import utinni.logic.GameRuntimeException;
 
 import java.util.List;
 
@@ -45,6 +46,12 @@ public class GameStatus {
     public int lastLostBonusTick = -1;
 
     public void updateFromCommonResponse(CommonResp commonResponse) {
+        if (commonResponse.getActionPointsLeft() > actionPointsLeft
+                && isOurTurn && builderUnit != commonResponse.getBuilderUnit()) {
+            // TODO It's a hack, we should handle this on the Command/s.
+            throw new GameRuntimeException();
+        }
+
         tick = commonResponse.getTurnsLeft();
         builderUnit = commonResponse.getBuilderUnit();
         actionPointsLeft = commonResponse.getActionPointsLeft();

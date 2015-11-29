@@ -240,7 +240,7 @@ public class ServiceWrapper {
         updateCount(Service.RADAR, response.getResult());
         GameStatus.get().updateFromCommonResponse(response.getResult());
 
-        // TODO We should update the instead of return the coordinates.
+        // TODO We should update the map instead of return the coordinates.
         return response.getScout();
     }
 
@@ -284,7 +284,7 @@ public class ServiceWrapper {
         updateCount(Service.WATCH, response.getResult());
         GameStatus.get().updateFromCommonResponse(response.getResult());
 
-        // TODO We should update the instead of return the coordinates.
+        // TODO We should update the map instead of return the coordinates.
         return response.getScout();
     }
 

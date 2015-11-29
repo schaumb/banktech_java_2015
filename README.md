@@ -27,3 +27,8 @@
 # Git integrálása IDEA-ba
 
 IDEA Toolbar / VCS / Git
+
+# Bean generálás
+
+A pom.xml 104. sorában kezdődő taget kell visszatenni és futtatni egy 'package'-t.
+Ha a wsimport futtatásánál hibát dob, akkor itt az első válasz megoldja a problémát: http://stackoverflow.com/questions/23011547/webservice-client-generation-error-with-jdk8.
