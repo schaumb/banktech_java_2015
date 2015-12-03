@@ -69,7 +69,9 @@ public class Logic {
 
                     if (tryTunnel(nextUnitId, map.getDirectionFromShuttle())) {
 
-                    } else if (tryStep(nextUnitId, map.getDirectionFromShuttle())) {
+                    }
+
+                    if (tryStep(nextUnitId, map.getDirectionFromShuttle())) {
                         watch(nextUnitId);
                     }
                 }
@@ -202,8 +204,8 @@ public class Logic {
                                 }
 
                                 if (result == 0) {
-                                    result = Coordinating.distance(c1.getLastAffectingCoordinate(), map.spaceShuttlePos).compareTo(
-                                            Coordinating.distance(c2.getLastAffectingCoordinate(), map.spaceShuttlePos));
+                                    result = Coordinating.distance(c1.getLastAffectingCoordinate(), map.startingQuarter).compareTo(
+                                            Coordinating.distance(c2.getLastAffectingCoordinate(), map.startingQuarter));
                                 }
 
                                 if (result == 0) {
