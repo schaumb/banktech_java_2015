@@ -69,7 +69,9 @@ public class Logic {
 
                     if (tryTunnel(nextUnitId, map.getDirectionFromShuttle())) {
 
-                    } else if (tryStep(nextUnitId, map.getDirectionFromShuttle())) {
+                    }
+
+                    if (tryStep(nextUnitId, map.getDirectionFromShuttle())) {
                         watch(nextUnitId);
                     }
                 }
@@ -193,17 +195,33 @@ public class Logic {
                                                 .filter((WsCoordinate wc) -> map.getField(wc) != null && map.getField(wc).isEnemy())
                                                 .count();
 
+                                        enemies1 += Coordinating.getCoordinatesToRadius(c1.getLastAffectingCoordinate(), 1).stream()
+                                                .filter((WsCoordinate wc) -> map.getField(wc) != null && map.getField(wc).isEnemyBuilder())
+                                                .count() * 10;
+
                                         Long enemies2 = Coordinating.getCoordinatesToRadius(c2.getLastAffectingCoordinate(), 1).stream()
                                                 .filter((WsCoordinate wc) -> map.getField(wc) != null && map.getField(wc).isEnemy())
                                                 .count();
+
+                                        enemies2 += Coordinating.getCoordinatesToRadius(c2.getLastAffectingCoordinate(), 1).stream()
+                                                .filter((WsCoordinate wc) -> map.getField(wc) != null && map.getField(wc).isEnemyBuilder())
+                                                .count() * 10;
 
                                         result = enemies1.compareTo(enemies2);
                                     }
                                 }
 
+
                                 if (result == 0) {
-                                    result = Coordinating.distance(c1.getLastAffectingCoordinate(), map.spaceShuttlePos).compareTo(
-                                            Coordinating.distance(c2.getLastAffectingCoordinate(), map.spaceShuttlePos));
+                                    WsCoordinate destination = BuilderUnitWrapper.getGlobalTarget(nextUnitId);
+                                    WsCoordinate c1Gac = c1.getLastAffectingCoordinate();
+                                    Integer c1Dis = Coordinating.distance(c1Gac, destination);
+                                    //System.out.println("c1Gac: " + c1Gac + ", c1Dis: " + c1Dis);
+                                    WsCoordinate c2Gac = c2.getLastAffectingCoordinate();
+                                    Integer c2Dis = Coordinating.distance(c2Gac, destination);
+                                    //System.out.println("c2Gac: " + c2Gac + ", c2Dis: " + c2Dis);
+                                    result = c1Dis.compareTo(c2Dis);
+                                    //System.out.println("dest: " + destination + ", result: " + result);
                                 }
 
                                 if (result == 0) {

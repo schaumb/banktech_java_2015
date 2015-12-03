@@ -96,6 +96,7 @@ public class Map {
 
         System.out.println("My space shuttle coord: " + spaceShuttlePos);
 
+        BuilderUnitWrapper.setGlobalTargets(spaceShuttlePos, mapSize);
         setLastCommonResponse(getSpaceShuttlePosResponse.getResult());
     }
 
