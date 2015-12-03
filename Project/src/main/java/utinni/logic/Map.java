@@ -19,6 +19,9 @@ public class Map {
     Runnable runAfterOk;
     Runnable runAfterNOk;
 
+    WsDirection horizontalDirectionFromShuttle;
+    WsDirection verticalDirectionFromShuttle;
+
     public boolean acceptCache(CommonResp commonResp) {
 
         if (commonResp.getType() == ResultType.DONE) {
@@ -93,6 +96,10 @@ public class Map {
         knownCoordinates.put(spaceShuttlePos,
                 new Field(spaceShuttlePos,
                         ObjectType.SHUTTLE, App.user, getTick()));
+
+
+        horizontalDirectionFromShuttle = spaceShuttlePos.getX() > mapSize.getX() / 2 ? WsDirection.LEFT : WsDirection.RIGHT;
+        verticalDirectionFromShuttle = spaceShuttlePos.getY() > mapSize.getY() / 2 ? WsDirection.DOWN : WsDirection.UP;
 
         System.out.println("My space shuttle coord: " + spaceShuttlePos);
 

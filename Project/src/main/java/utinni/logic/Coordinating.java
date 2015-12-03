@@ -52,6 +52,17 @@ public class Coordinating {
         }
     }
 
+    public static WsDirection getOppositeDirection(WsDirection dir) {
+        switch (dir)
+        {
+            case UP: return WsDirection.DOWN;
+            case DOWN: return WsDirection.UP;
+            case LEFT: return WsDirection.RIGHT;
+            case RIGHT: return WsDirection.LEFT;
+            default: return WsDirection.DOWN;
+        }
+    }
+
     public static Integer distance(WsCoordinate coord1, WsCoordinate coord2) {
         return Math.abs(coord1.getX() - coord2.getX()) + Math.abs(coord1.getY() - coord2.getY());
     }
