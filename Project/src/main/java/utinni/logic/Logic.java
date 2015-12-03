@@ -182,7 +182,7 @@ public class Logic {
 
                                 if (result == 0) {
                                     if (c1.getLastType() != c2.getLastType()) {
-                                        result = c1.getLastType() == Command.Type.Explode
+                                        result = c1.getLastType() == Command.Type.Tunnel
                                                 || c2.getLastType() == Command.Type.Xplore ? -1 : 1;
                                     }
                                 }
@@ -225,6 +225,32 @@ public class Logic {
                                 }
 
                                 if (result == 0) {
+                                    WsCoordinate destination = BuilderUnitWrapper.getGlobalTarget(nextUnitId);
+                                    WsCoordinate c1Gac = c1.getLastAffectingCoordinate();
+
+                                    Integer i1 =
+                                        Coordinating.distance(destination,
+                                            Coordinating.getCoordinatesToRadius(c1Gac, 1).stream()
+                                                    .filter((WsCoordinate w) -> map.getField(w) == null || map.getField(w).isTunnelable() || map.getField(w).isExpodable())
+                                                    .sorted((WsCoordinate w1, WsCoordinate w2) ->
+                                                            Coordinating.distance(w1, destination).compareTo(Coordinating.distance(w2, destination)))
+                                                    .findFirst().get());
+
+                                    WsCoordinate c2Gac = c2.getLastAffectingCoordinate();
+
+                                    Integer i2 =
+                                            Coordinating.distance(destination,
+                                                    Coordinating.getCoordinatesToRadius(c2Gac, 1).stream()
+                                                            .filter((WsCoordinate w) -> map.getField(w) == null || map.getField(w).isTunnelable() || map.getField(w).isExpodable())
+                                                            .sorted((WsCoordinate w1, WsCoordinate w2) ->
+                                                                    Coordinating.distance(w1, destination).compareTo(Coordinating.distance(w2, destination)))
+                                                            .findFirst().get());
+
+                                    result = i1.compareTo(i2);
+                                }
+
+
+                                if (result == 0) {
                                     result = BuilderUnitWrapper.getDirectionWeight(nextUnitId, c1.getFirstCommand().getDirection()).compareTo(
                                             BuilderUnitWrapper.getDirectionWeight(nextUnitId, c2.getFirstCommand().getDirection()));
                                 }
@@ -238,12 +264,12 @@ public class Logic {
                     }
 
                     int points = map.getLastCommonResponse().getActionPointsLeft();
-                    System.out.println("Possible Commands: (AP: " + points + ")");
-                    for(Commands c: possibleCommands) {
-                        System.out.println(c.toString() + " (Now: "+ c.getCostMax(points) + ")" );
-                    }
+                    //System.out.println("Possible Commands: (AP: " + points + ")");
+                    //for(Commands c: possibleCommands) {
+                    //    System.out.println(c.toString() + " (Now: "+ c.getCostMax(points) + ")" );
+                    //}
 
-                    System.out.println();
+                    //System.out.println();
 
                     BuilderUnitWrapper.targets.put(nextUnitId, possibleCommands.get(0).getLastAffectingCoordinate());
 
@@ -445,8 +471,8 @@ public class Logic {
                                 },
                                 maxCanRadar);
 
-                System.out.println("Refresh Danger places:");
-                System.out.println(Arrays.toString(otherRefresh.toArray()));
+                //System.out.println("Refresh Danger places:");
+                //System.out.println(Arrays.toString(otherRefresh.toArray()));
 
                 tryRadar(nextUnitId, otherRefresh);
             }
@@ -498,7 +524,7 @@ public class Logic {
     public int sleepWhile() {
         while(true) {
             try {
-                Thread.sleep(301L);
+                Thread.sleep(151L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 System.exit(0);

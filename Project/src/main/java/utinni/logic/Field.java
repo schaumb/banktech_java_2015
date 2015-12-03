@@ -123,23 +123,33 @@ class BuilderUnitWrapper extends Field {
     public static ArrayList<WsCoordinate> globalTargets = new ArrayList<>();
 
     public static void setGlobalTargets(WsCoordinate shuttlePos, WsCoordinate mapSize) {
+        WsCoordinate base = new WsCoordinate();
+        WsCoordinate center = new WsCoordinate();
         if(shuttlePos.getX() > mapSize.getX() / 2) {
-            globalTargets.add(new WsCoordinate(mapSize.getX() * 4 / 6, mapSize.getY() / 2));
+            base.setX(mapSize.getX() - 1);
+            center.setX(mapSize.getX() * 4 / 6);
             globalTargets.add(new WsCoordinate(mapSize.getX() * 5 / 6, mapSize.getY() / 2));
         }
         else {
+            base.setX(0);
+            center.setX(mapSize.getX() * 2 / 6);
             globalTargets.add(new WsCoordinate(mapSize.getX() * 1 / 6, mapSize.getY() / 2));
-            globalTargets.add(new WsCoordinate(mapSize.getX() * 2 / 6, mapSize.getY() / 2));
         }
 
         if(shuttlePos.getY() > mapSize.getY() / 2) {
-            globalTargets.add(new WsCoordinate(mapSize.getX() / 2, mapSize.getY() * 4 / 6));
+            base.setY(mapSize.getY() - 1);
+            center.setY(mapSize.getY() * 4 / 6);
             globalTargets.add(new WsCoordinate(mapSize.getX() / 2, mapSize.getY() * 5 / 6));
         }
         else {
+            base.setY(0);
+            center.setY(mapSize.getY() * 2 / 6);
             globalTargets.add(new WsCoordinate(mapSize.getX() / 2, mapSize.getY() * 1 / 6));
-            globalTargets.add(new WsCoordinate(mapSize.getX() / 2, mapSize.getY() * 2 / 6));
         }
+        globalTargets.add(base);
+        globalTargets.add(center);
+
+
         System.out.println(Arrays.toString(globalTargets.toArray()));
     }
 

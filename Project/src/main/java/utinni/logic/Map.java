@@ -42,7 +42,7 @@ public class Map {
     public void addInfo(StartGameResponse startGameResponse) {
         setLastCommonResponse(startGameResponse.getResult());
 
-        StrategyObserver.get().actionPoint = startGameResponse.getResult().getActionPointsLeft();
+        StrategyObserver.get().actionPoint = 20;
 
         mapSize = startGameResponse.getSize();
         mapSize.setX(mapSize.getX() + 1);
@@ -393,8 +393,7 @@ public class Map {
                         });
             }
             else {
-                if(now.getLastType() == Command.Type.Explode &&
-                        getField(now.getLastAffectingCoordinate()).isGranite()) {
+                if(now.getLastType() == Command.Type.Explode) {
                     Command c = new Command(now.getLastStandingCoordinate(), now.getLastDirection());
                     c.setCommandType(Command.Type.Tunnel);
                     now.addCommand(c);
