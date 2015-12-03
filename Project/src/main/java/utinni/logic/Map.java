@@ -13,7 +13,6 @@ public class Map {
     WsCoordinate mapSize;
     WsCoordinate spaceShuttlePos;
     WsCoordinate spaceShuttleExitPos;
-    WsCoordinate startingQuarter;
     HashMap<WsCoordinate, Field> knownCoordinates = new HashMap<>();
     HashMap<Integer, BuilderUnitWrapper> ourUnits = new HashMap<>();
     CommonResp lastCommonResponse;
@@ -94,10 +93,6 @@ public class Map {
         knownCoordinates.put(spaceShuttlePos,
                 new Field(spaceShuttlePos,
                         ObjectType.SHUTTLE, App.user, getTick()));
-
-        startingQuarter = new WsCoordinate(
-                spaceShuttlePos.getX() > mapSize.getX() / 2 ? mapSize.getX() - 1 : 0,
-                spaceShuttlePos.getY() > mapSize.getY() / 2 ? mapSize.getY() - 1 : 0);
 
         System.out.println("My space shuttle coord: " + spaceShuttlePos);
 
