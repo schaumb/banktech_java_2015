@@ -125,28 +125,46 @@ class BuilderUnitWrapper extends Field {
     public static void setGlobalTargets(WsCoordinate shuttlePos, WsCoordinate mapSize) {
         WsCoordinate base = new WsCoordinate();
         WsCoordinate center = new WsCoordinate();
-        if(shuttlePos.getX() > mapSize.getX() / 2) {
+        WsCoordinate closerCenter = new WsCoordinate();
+        WsCoordinate furtherCenter = new WsCoordinate();
+        closerCenter.setX(mapSize.getX() / 2 + 5);
+        furtherCenter.setX(mapSize.getX() / 2 - 5);
+
+        boolean xBigger = shuttlePos.getX() > mapSize.getX() / 2;
+        boolean yBigger = shuttlePos.getY() > mapSize.getY() / 2;
+        if(xBigger) {
             base.setX(mapSize.getX() - 1);
             center.setX(mapSize.getX() * 4 / 6);
-            globalTargets.add(new WsCoordinate(mapSize.getX() * 5 / 6, mapSize.getY() / 2));
+            //globalTargets.add(new WsCoordinate(mapSize.getX() * 5 / 6, mapSize.getY() / 2));
         }
         else {
             base.setX(0);
             center.setX(mapSize.getX() * 2 / 6);
-            globalTargets.add(new WsCoordinate(mapSize.getX() * 1 / 6, mapSize.getY() / 2));
+            //globalTargets.add(new WsCoordinate(mapSize.getX() * 1 / 6, mapSize.getY() / 2));
         }
 
-        if(shuttlePos.getY() > mapSize.getY() / 2) {
+        if(yBigger) {
             base.setY(mapSize.getY() - 1);
             center.setY(mapSize.getY() * 4 / 6);
-            globalTargets.add(new WsCoordinate(mapSize.getX() / 2, mapSize.getY() * 5 / 6));
+            //globalTargets.add(new WsCoordinate(mapSize.getX() / 2, mapSize.getY() * 5 / 6));
         }
         else {
             base.setY(0);
             center.setY(mapSize.getY() * 2 / 6);
-            globalTargets.add(new WsCoordinate(mapSize.getX() / 2, mapSize.getY() * 1 / 6));
+            //globalTargets.add(new WsCoordinate(mapSize.getX() / 2, mapSize.getY() * 1 / 6));
         }
+
+        if(xBigger ^ yBigger) {
+            closerCenter.setY(mapSize.getY() / 2 - 5);
+            furtherCenter.setY(mapSize.getY() / 2 + 5);
+        }
+        else {
+            closerCenter.setY(mapSize.getY() / 2 + 5);
+            furtherCenter.setY(mapSize.getY() / 2 - 5);
+        }
+        globalTargets.add(shuttlePos);
         globalTargets.add(base);
+        globalTargets.add(center);
         globalTargets.add(center);
 
 

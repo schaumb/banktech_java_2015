@@ -287,6 +287,9 @@ public class Logic {
             }
             catch (GameRuntimeException e) {
                 System.out.println(e.getMessage());
+                if(map.getLastCommonResponse().getTurnsLeft() == 0) {
+                    System.exit(0);
+                }
             }
         }
     }
